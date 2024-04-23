@@ -90,7 +90,7 @@ function deletePost(){
         </div>
         <div class="mb-3">
             <Disclosure v-slot="{ open }">
-                <div v-if="!open" v-html="post.body.substring(0, 200)" />
+                <div class="ck-content-output"v-if="!open" v-html="post.body.substring(0, 200)" />
                 <template v-if="post.body.length > 200">
                     <DisclosurePanel>
                         <div v-html="post.body" />

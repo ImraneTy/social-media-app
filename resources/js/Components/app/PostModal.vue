@@ -41,8 +41,8 @@
                 </DialogTitle>
                 <div class=" p-4">
                   <PostUserHeader :post="post" :show-time="false"  class="mb-4"/>
-
-                  <InputTextarea v-model="form.body" class=" mb-3  w-full"></InputTextarea>
+                  <ckeditor :editor="editor" v-model="form.body" :config="editorConfig"></ckeditor>
+                  <!-- <InputTextarea v-model="form.body" class=" mb-3  w-full"></InputTextarea> -->
                 </div>
   
                 <div class="py-3 px-4 ">
@@ -78,7 +78,11 @@ import {useForm} from "@inertiajs/vue3"
     DialogTitle,
   } from '@headlessui/vue'
   
-
+  import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
+  const editor= ClassicEditor;
+  const editorConfig= {
+                    toolbar :['heading','|','bold','italic','bulletedList','|','outdent','|','link','|','blockQuote']
+                }
   
 
   const props = defineProps({
