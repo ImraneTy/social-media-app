@@ -7,7 +7,7 @@ import{ref} from "vue";
 import { router } from '@inertiajs/vue3';
 
 const props=defineProps({
-    post: Object
+    post: Object,
 });
 
 const emit = defineEmits(['editClick'])
@@ -90,18 +90,19 @@ function deletePost(){
         </div>
         <div class="mb-3">
             <Disclosure v-slot="{ open }">
-                <div class="ck-content-output"v-if="!open" v-html="post.body.substring(0, 200)" />
-                <template v-if="post.body.length > 200">
-                    <DisclosurePanel>
-                        <div v-html="post.body" />
-                    </DisclosurePanel>
-                    <div class="flex justify-end">
-                        <DisclosureButton class=" text-blue-500 hover:underline ">
-                            {{ open ? 'Read less' : 'Read more' }}
-                        </DisclosureButton>
-                    </div>
-                </template>
-            </Disclosure>
+        <div class="ck-content-output"  v-if="!open" v-html="post.body.substring(0, 200)"/>
+
+        <template v-if="post.body && post.body.length > 200">
+            <DisclosurePanel>
+                <div class="ck-content-output"  v-html="post.body"/>
+            </DisclosurePanel>
+            <div class="flex justify-end">
+                <DisclosureButton class="text-blue-500 hover:underline">
+                    {{ open ? 'Read less' : 'Read More' }}
+                </DisclosureButton>
+            </div>
+        </template>
+    </Disclosure>
         </div>
 
         <div class="grid lg:grid-cols-3 md:grid-cols-2 grid-cols-2  gap-3 mb-3 ">

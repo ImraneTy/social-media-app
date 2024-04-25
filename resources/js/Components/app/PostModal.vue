@@ -1,4 +1,82 @@
-<template>
+
+  <script setup>
+import {computed, ref, watch} from 'vue'
+import InputTextarea from "@/Components/InputTextarea.vue";
+import PostUserHeader from "@/Components/app/PostUserHeader.vue";
+import { XMarkIcon } from '@heroicons/vue/24/solid'
+import {useForm} from "@inertiajs/vue3"
+  import {
+    TransitionRoot,
+    TransitionChild,
+    Dialog,
+    DialogPanel,
+    DialogTitle,
+  } from '@headlessui/vue'
+  
+  import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
+  const editor= ClassicEditor;
+  const editorConfig= {
+    toolbar: ['bold', 'italic', '|', 'bulletedList', 'numberedList', '|', 'heading', '|', 'outdent', 'indent', '|', 'link', '|', 'blockQuote'],
+
+                }
+  
+
+  const props = defineProps({
+
+ 
+    post:{
+      type:Object,
+      required:true
+    },
+    modelValue:Boolean
+   }
+  )
+
+  const form = useForm({
+    id:null,
+    body:''
+
+  })
+  const show = computed({
+    get:()=>props.modelValue,
+    set:(value)=>emit('update:modelValue',value)
+  })
+
+
+  const emit=defineEmits(['update:modelValue'])
+
+
+watch(()=>props.post,()=>{
+  form.id=props.post.id,
+  form.body=props.post.body
+})
+
+  function closeModal() {
+    show.value = false
+  }
+  function submit(){
+    if(form.id){
+          form.put(route('post.update',props.post.id),{      
+      preserveScroll: true,onSuccess:()=>{
+      show.value=false
+
+    }})
+    }
+    else{
+      form.post(route('post.create'),{
+        preserveScroll: true,
+        onSuccess:()=>{
+          show.value=false
+
+        }
+    })
+    }
+
+  }
+
+
+  </script>
+  <template>
     <teleport to="body">
     <TransitionRoot appear :show="show" as="template">
     
@@ -16,7 +94,7 @@
         </TransitionChild>
   
         <div class="fixed inset-0 overflow-y-auto">
-          <div
+         <div
             class="flex min-h-full items-center justify-center p-4 text-center"
           >
             <TransitionChild
@@ -63,69 +141,3 @@
     </TransitionRoot>
   </teleport>
   </template>
-  
-  <script setup>
-import {computed, ref, watch} from 'vue'
-import InputTextarea from "@/Components/InputTextarea.vue";
-import PostUserHeader from "@/Components/app/PostUserHeader.vue";
-import { XMarkIcon } from '@heroicons/vue/24/solid'
-import {useForm} from "@inertiajs/vue3"
-  import {
-    TransitionRoot,
-    TransitionChild,
-    Dialog,
-    DialogPanel,
-    DialogTitle,
-  } from '@headlessui/vue'
-  
-  import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
-  const editor= ClassicEditor;
-  const editorConfig= {
-                    toolbar :['heading','|','bold','italic','bulletedList','|','outdent','|','link','|','blockQuote']
-                }
-  
-
-  const props = defineProps({
-
- 
-    post:{
-      type:Object,
-      required:true
-    },
-    modelValue:Boolean
-   }
-  )
-
-  const form = useForm({
-    id:null,
-    body:''
-
-  })
-  const show = computed({
-    get:()=>props.modelValue,
-    set:(value)=>emit('update:modelValue',value)
-  })
-
-
-  const emit=defineEmits(['update:modelValue'])
-
-
-watch(()=>props.post,()=>{
-  form.id=props.post.id,
-  form.body=props.post.body
-})
-
-  function closeModal() {
-    show.value = false
-  }
-  function submit(){
-
-    form.put(route('post.update',props.post.id),{      
-      preserveScroll: true,onSuccess:()=>{
-      show.value=false
-    }})
-  }
-
-
-  </script>
-  

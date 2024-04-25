@@ -73,9 +73,10 @@ attachments:[{
 </script>
 
 <template>
-    <div class="h-full overflow-auto">
+    <div class=" overflow-auto">
         <PostItem v-for=" post of posts" :key="post.id" :post="post" @editClick="openEditModal"/>
-        <PostModal :post="editPost" v-model="showEditModal"/>
+        <PostModal :post="editPost" v-model="showEditModal" />
+
 
     </div>
 
