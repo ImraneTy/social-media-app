@@ -5,16 +5,13 @@ import { ChevronDownIcon, PencilIcon, TrashIcon,EllipsisVerticalIcon } from '@he
 import PostUserHeader from "@/Components/app/PostUserHeader.vue";
 import{ref} from "vue";
 import { router } from '@inertiajs/vue3';
-
+import {isImage} from '../../helpers'
 const props=defineProps({
     post: Object,
 });
 
 const emit = defineEmits(['editClick'])
-function isImage(attachment) {
-    const mime = attachment.mime.split('/')
-    return mime[0].toLowerCase() === 'image'
-}
+
 
 function openEditModal() {
     emit('editClick', props.post)
