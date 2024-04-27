@@ -13,6 +13,7 @@ import {
 } from '@headlessui/vue'
 import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
 import {isImage} from "@/helpers.js";
+
 const editor = ClassicEditor;
 const editorConfig = {
   toolbar: ['bold', 'italic', '|', 'bulletedList', 'numberedList', '|', 'heading', '|', 'outdent', 'indent', '|', 'link', '|', 'blockQuote'],
@@ -36,7 +37,8 @@ const props = defineProps({
 const attachmentFiles = ref([]);
 const form = useForm({
   id: null,
-  body: ''
+  body: '',
+  attachments:[]
 
 })
 const show = computed({
@@ -55,14 +57,26 @@ watch(() => props.post, () => {
 
 function closeModal() {
   show.value = false
+  resetModal()
+
+}
+
+
+
+function resetModal(){
   form.reset()
   attachmentFiles.value=[]
 }
+
+
+
 function submit() {
+  form.attachments=attachmentFiles.value.map(myFile=>myFile.file)
   if (form.id) {
     form.put(route('post.update', props.post.id), {
       preserveScroll: true, onSuccess: () => {
         show.value = false
+        closeModal()
 
       }
     })
@@ -72,7 +86,7 @@ function submit() {
       preserveScroll: true,
       onSuccess: () => {
         show.value = false
-
+        closeModal()
       }
     })
   }
@@ -116,7 +130,7 @@ function removeFile(myFile){
   <teleport to="body">
     <TransitionRoot appear :show="show" as="template">
 
-      <Dialog as="div" @close="closeModal" class="relative z-10">
+      <Dialog as="div" @close="closeModal" class="relative z-50">
         <TransitionChild as="template" enter="duration-300 ease-out" enter-from="opacity-0" enter-to="opacity-100"
           leave="duration-200 ease-in" leave-from="opacity-100" leave-to="opacity-0">
           <div class="fixed inset-0 bg-black/25" />
@@ -143,7 +157,9 @@ function removeFile(myFile){
 
 
                   <ckeditor :editor="editor" v-model="form.body" :config="editorConfig"></ckeditor>
-                  <div class="grid lg:grid-cols-3 md:grid-cols-2 grid-cols-2  gap-3 my-3 ">
+                  <div class="grid  gap-3 my-3 " :class="[
+            attachmentFiles.length===1 ?'grid-cols-1' : 'grid-cols-2'
+        ]">
                     <template v-for="(myFile,ind) of attachmentFiles">
 
 
@@ -156,7 +172,7 @@ function removeFile(myFile){
                                     <XMarkIcon class="h-5 w-5 " />
                                 </button>
 
-                        <img v-if="isImage(myFile.file)" :src="myFile.url" class="object-cover aspect-square">
+                        <img v-if="isImage(myFile.file)" :src="myFile.url" class="object-contain aspect-square">
 
                         <template v-else>
                           <PaperClipIcon class="w-10 h-10 mb-3 "/>
