@@ -33,7 +33,7 @@ function deletePost(){
         <div class="flex item-center justify-between  mb-3">
 
             <PostUserHeader :post="post"/>
-                <Menu as="div" class="relative inline-block text-left">
+                <Menu as="div" class="relative z-10 inline-block text-left">
                     <div>
                         <MenuButton 
                         class="w-8 h-8 z-10 rounded-full hover:bg-black/5 transition flex items-center justify-center ">
@@ -111,7 +111,7 @@ function deletePost(){
 
                 <div
                     class="group relative aspect-square bg-blue-100 flex  flex-col items-center justify-center text-gray-500 ">
-                    <div v-if="ind === 3  "
+                    <div v-if="ind === 3  && post.attachments.length > 4 "
                  class="absolute left-0 top-0 right-0 bottom-0 z-10 bg-black/60 text-white flex items-center justify-center text-2xl">
                 +{{ post.attachments.length - 4 }} more
             </div>
