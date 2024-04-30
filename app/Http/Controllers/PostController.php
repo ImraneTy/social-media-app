@@ -126,4 +126,9 @@ class PostController extends Controller
         return back();
 
     }
+    public function downloadAttachment(PostAttachment $attachment)
+    {
+
+        return response()->download(Storage::disk('public')->path($attachment->path), $attachment->name);
+    }
 }
