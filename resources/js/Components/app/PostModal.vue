@@ -202,7 +202,7 @@ function undoDelete(myFile) {
                         <img v-if="isImage(myFile.file || myFile)" :src="myFile.url"
                           class="object-contain aspect-square " :class="myFile.deleted ? 'opacity-50' : ''">
 
-                        <div v-else class="flex flex-com justify-center items-center "
+                        <div v-else class="flex flex-col justify-center items-center "
                           :class="myFile.deleted ? 'opacity-50' : ''">
                           <PaperClipIcon class="w-10 h-10 mb-3 " />
 
