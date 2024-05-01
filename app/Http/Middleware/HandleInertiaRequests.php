@@ -37,7 +37,11 @@ class HandleInertiaRequests extends Middleware
             'auth' => [
                 'user' => $request->user() ? new UserResource($request->user()) : null,
             ],
-
+            'attachmentExtensions' => StorePostRequest::$extensions,
+            // 'ziggy' => fn () => [
+            //     ...(new Ziggy)->toArray(),
+            //     'location' => $request->url(),
+            // ],
         ];
     }
 }
