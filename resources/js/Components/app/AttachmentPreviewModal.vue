@@ -99,7 +99,7 @@ function next() {
                                         <ChevronRightIcon class="w-12"/>
                                     </div>
 
-                                    <div class="flex items-center justify-center w-full h-full p-3">
+                                    <div class="flex  items-center justify-center w-full h-full p-3">
                                         <img v-if="isImage(attachment)"
                                              :src="attachment.url"
                                              class="max-w-full max-h-full"/>

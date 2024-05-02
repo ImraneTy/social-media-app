@@ -39,7 +39,7 @@ const props = defineProps({
 const attachmentFiles = ref([]);
 const attachmentErrors = ref([]);
 const formErrors = ref({});
-const showExtentionsText= ref(false)
+
 
 const form = useForm({
   body: '',
@@ -57,6 +57,17 @@ const computedAttachments = computed(() => {
   return [...attachmentFiles.value, ...(props.post.attachments || [])]
 })
 
+const showExtentionsText=computed(()=>{
+  for(let myFile of attachmentFiles.value){
+    const file=myFile.file
+    let parts=file.name.split('.')
+    let ext=parts.pop().toLowerCase()
+    if(!attachmentExtensions.includes(ext)){
+      return true
+    }
+  }
+  return false
+})
 
 const emit = defineEmits(['update:modelValue', 'hide'])
 
@@ -80,6 +91,7 @@ function closeModal() {
 function resetModal() {
   form.reset()
   attachmentFiles.value = []
+  formErrors.value={}
   showExtentionsText.value=false
   attachmentErrors.value=[]
   if (props.post.attachments) {
@@ -135,11 +147,7 @@ function processErrors(errors) {
 
 async function onAttachmentChoose($event) {
   for (const file of $event.target.files) {
-    let parts=file.name.split('.')
-    let ext=parts.pop().toLowerCase()
-    if(!attachmentExtensions.includes(ext)){
-      showExtentionsText.value=true
-    }
+
     const myFile = {
       file,
       url: await readFile(file)
@@ -215,8 +223,15 @@ function undoDelete(myFile) {
                   <ckeditor :editor="editor" v-model="form.body" :config="editorConfig"></ckeditor>
                   <div v-if="showExtentionsText" class="border-l-4 border-amber-500 py-2 px-3 bg-amber-100 mt-3 text-gray-800">
                     Files must be one of the following extensions <br>
-                 <small>{{ attachmentExtensions.join(', ') }}</small>                  
+                 <small>{{ attachmentExtensions.join(', ') }}</small>
+                 
+                 
+
                 </div> 
+                <div v-if="formErrors.attachments"
+                 class="border-l-4 border-red-500 py-2 px-3 bg-red-100 mt-3 text-gray-800">
+                {{ formErrors.attachments }}
+            </div>
                   <div class="grid  gap-3 my-3 " :class="[
       computedAttachments.length === 1 ? 'grid-cols-1' : 'grid-cols-2'
     ]">
