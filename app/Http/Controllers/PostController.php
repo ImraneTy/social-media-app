@@ -13,6 +13,8 @@ use App\Models\PostAttachment;
 use App\Http\Enums\ReactionEnum;
 use Illuminate\Validation\Rule;
 use App\Models\postReaction;
+use App\Models\PostComment;
+use App\Http\Resources\CommentResource;
 
 
 class PostController extends Controller
@@ -161,5 +163,23 @@ class PostController extends Controller
             'num_of_reactions' => $reactions,
             'current_user_has_reaction' => $hasReaction
         ]);
+    }
+    public function createComment(Request $request, Post $post)
+    {
+        $data = $request->validate([
+            'comment' => ['required'],
+        ]);
+
+        $comment = PostComment::create([
+            'post_id' => $post->id,
+            'comment' => nl2br($data['comment']),
+            'user_id' => Auth::id(),
+        ]);
+
+        // $post = $comment->post;
+        // $post->user->notify(new CommentCreated($comment, $post));
+
+        return response(new CommentResource($comment), 201);
+
     }
 }
