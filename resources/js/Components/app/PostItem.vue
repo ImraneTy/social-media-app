@@ -61,7 +61,7 @@ function sendReaction() {
     axiosClient.post(route('post.reaction', props.post), {
         reaction: 'like'
     })
-        .then(({ data }) => {
+        .then(({data}) => {
             props.post.current_user_has_reaction = data.current_user_has_reaction
             props.post.num_of_reactions = data.num_of_reactions;
         })
@@ -86,7 +86,7 @@ function deleteComment(comment) {
     if(!window.confirm('Are you sure you want to delete this comment?')){
         return false;
     }
-    axiosClient.delete(route('post.comment.delete',comment.id))
+    axiosClient.delete(route('comment.delete',comment.id))
     .then(({data})=>{
         props.post.comments=props.post.comments.filter(c=>c.id!==comment.id)
         props.post.num_of_comments-- ;
@@ -102,7 +102,7 @@ function startCommentEdit(comment){
 
 
 function updateComment() {
-    axiosClient.put(route('post.comment.update', editingComment.value.id), editingComment.value)
+    axiosClient.put(route('comment.update', editingComment.value.id), editingComment.value)
         .then(({data}) => {
             editingComment.value = null
             props.post.comments = props.post.comments.map((c) => {
@@ -111,6 +111,15 @@ function updateComment() {
                 }
                 return c;
             })
+        })
+}
+function sendCommentReaction(comment) {
+    axiosClient.post(route('comment.reaction', comment.id), {
+        reaction: 'like'
+    })
+        .then(({data}) => {
+            comment.current_user_has_reaction = data.current_user_has_reaction
+            comment.num_of_reactions = data.num_of_reactions;
         })
 }
 </script>
@@ -240,7 +249,19 @@ function updateComment() {
                     </div>
                 
                 <ReadMoreReadLess v-else  :content="comment.comment" content-class="text-sm flex flex-1 "/>
+                <div>
+                <button 
+                @click="sendCommentReaction(comment)"
+                class="flex items-center text-xs text-indigo-500 py-0.5 px-1  rounded-lg"
+                :class="[ comment.current_user_has_reaction ? 'bg-indigo-50 hover:bg-indigo-100' : 'hover:bg-indigo-50' ]">
+                    <HandThumbUpIcon class="w-3 h-3 mr-1"/>
+                    <span class="mr-2">{{ comment.num_of_reactions }}</span>
+                    {{ comment.current_user_has_reaction ? 'unlike' : 'like' }}
+                    </button>
+
             </div>
+            </div>
+
                     </div>
                 </div>
 
