@@ -86,18 +86,14 @@ function closeModal() {
 
 }
 
-
-
 function resetModal() {
-  form.reset()
-  attachmentFiles.value = []
-  formErrors.value={}
-  showExtentionsText.value=false
-  attachmentErrors.value=[]
-  if (props.post.attachments) {
-    props.post.attachments.forEach(file => file.deleted = false)
-
-  }
+    form.reset()
+    formErrors.value = {}
+    attachmentFiles.value = []
+    attachmentErrors.value = [];
+    if (props.post.attachments) {
+        props.post.attachments.forEach(file => file.deleted = false)
+    }
 }
 
 

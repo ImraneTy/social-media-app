@@ -15,6 +15,7 @@ use Illuminate\Validation\Rule;
 use App\Models\postReaction;
 use App\Models\PostComment;
 use App\Http\Resources\CommentResource;
+use App\Http\Requests\UpdateCommentRequest;
 
 
 class PostController extends Controller
@@ -176,10 +177,30 @@ class PostController extends Controller
             'user_id' => Auth::id(),
         ]);
 
-        // $post = $comment->post;
-        // $post->user->notify(new CommentCreated($comment, $post));
 
         return response(new CommentResource($comment), 201);
 
     }
+
+    public function deleteComment(PostComment $comment){
+        if ($comment->user_id!== Auth::id()){
+            return response("you don't have permision to delete this comment.",403);
+        }
+            $comment->delete();
+            return response('',204);
+       
+    }
+
+
+    public function updateComment(UpdateCommentRequest $request, PostComment $comment)
+    {
+        $data = $request->validated();
+
+        $comment->update([
+            'comment' => nl2br($data['comment'])
+        ]);
+
+        return new CommentResource($comment);
+    }
+
 }
