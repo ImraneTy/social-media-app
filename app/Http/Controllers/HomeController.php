@@ -28,7 +28,12 @@ class HomeController extends Controller
             $query->where('user_id',$userId);
         }])
         ->latest()
-        ->paginate(20);
-        return Inertia::render('Home',['posts'=>PostResource::collection($posts)]);
+        ->paginate(10);
+        $posts = PostResource::collection($posts);
+
+        if ($request->wantsJson()) {
+            return $posts;
+        }
+        return Inertia::render('Home',['posts'=>$posts]);
     }
 }
