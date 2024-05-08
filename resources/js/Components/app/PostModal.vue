@@ -183,7 +183,7 @@ function removeFile(myFile) {
 
 function undoDelete(myFile) {
   myFile.deleted = false
-  form.deleted_file_ids = form.deleted_file_ids - filter(ids => myFile.id !== id)
+  form.deleted_file_ids = form.deleted_file_ids.filter(id => myFile.id !== id)
 }
 </script>
 <template>
