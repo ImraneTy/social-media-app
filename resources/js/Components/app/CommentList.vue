@@ -88,13 +88,18 @@ function sendCommentReaction(comment) {
         })
 }
 
-function onCommentCreate(comment) {
 
+function onCommentCreate(comment) {
+    if (props.parentComment) {
+        props.parentComment.num_of_comments++;
+    }
     emit('commentCreate', comment)
 }
 
 function onCommentDelete(comment) {
-
+    if (props.parentComment) {
+        props.parentComment.num_of_comments--;
+    }
     emit('commentDelete', comment)
 }
 </script>
