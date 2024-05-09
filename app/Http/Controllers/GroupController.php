@@ -13,6 +13,11 @@ use App\Models\GroupUser;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\Request;
+use App\Http\Requests\InviteUsersRequest;
+use Illuminate\Support\Str;
+use Carbon\Carbon;
+use App\Notifications\InvitationInGroup;
+use App\Notifications\InvitationApproved;
 
 
 class GroupController extends Controller
@@ -118,4 +123,66 @@ class GroupController extends Controller
 
     return back()->with('success', $success);
 }
+
+public function inviteUsers(InviteUsersRequest $request, Group $group)
+{
+    $data = $request->validated();
+
+    $user = $request->user;
+
+    $groupUser = $request->groupUser;
+
+    if ($groupUser) {
+        $groupUser->delete();
+    }
+
+    $hours = 24;
+    $token = Str::random(256);
+
+    GroupUser::create([
+        'status' => GroupUserStatus::PENDING->value,
+        'role' => GroupUserRole::USER->value,
+        'token' => $token,
+        'token_expire_date' => Carbon::now()->addHours($hours),
+        'user_id' => $user->id,
+        'group_id' => $group->id,
+        'created_by' => Auth::id(),
+    ]);
+
+    $user->notify(new InvitationInGroup($group, $hours, $token));
+
+
+    return back()->with('success', 'User was invited to join to group');
+}
+public function approveInvitation(string $token)
+{
+    $groupUser = GroupUser::query()
+        ->where('token', $token)
+        ->first();
+
+    $errorTitle = '';
+    if (!$groupUser) {
+        $errorTitle = 'The link is not valid';
+    } else if ($groupUser->token_used || $groupUser->status === GroupUserStatus::APPROVED->value) {
+        $errorTitle = 'The link is already used';
+    } else if ($groupUser->token_expire_date < Carbon::now()) {
+        $errorTitle = 'The link is expired';
+    }
+
+    if ($errorTitle) {
+        return \inertia('Error', compact('errorTitle'));
+    }
+
+    $groupUser->status = GroupUserStatus::APPROVED->value;
+    $groupUser->token_used = Carbon::now();
+    $groupUser->save();
+
+    $adminUser = $groupUser->adminUser;
+
+    $adminUser->notify(new InvitationApproved($groupUser->group, $groupUser->user));
+
+    return redirect(route('group.profile', $groupUser->group))
+        ->with('success', 'You accepted to join to group "' . $groupUser->group->name . '"');
+}
+
 }
