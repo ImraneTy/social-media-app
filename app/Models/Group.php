@@ -7,6 +7,9 @@ use Illuminate\Database\Eloquent\Model;
 use Spatie\Sluggable\SlugOptions;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Spatie\Sluggable\HasSlug;
+use App\Models\GroupUser;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Group extends Model
 {
@@ -15,7 +18,7 @@ class Group extends Model
     use HasSlug;
 
 
-    protected $fillable = ['name', 'user_id', 'auto_approval', 'about'];
+    protected $fillable = ['name', 'user_id', 'auto_approval', 'about' ,'cover_path', 'thumbnail_path',];
 
 
     public function getSlugOptions(): SlugOptions
@@ -24,6 +27,15 @@ class Group extends Model
             ->generateSlugsFrom('name')
             ->saveSlugsTo('slug')
             ->doNotGenerateSlugsOnUpdate();
+    }
+
+    public function currentUserGroup(): HasOne
+    {
+        return $this->hasOne(GroupUser::class)->where('user_id', Auth::id());
+    }
+    public function isAdmin($userId): bool
+    {
+        return $this->currentUserGroup->user_id=$userId;
     }
 
 }

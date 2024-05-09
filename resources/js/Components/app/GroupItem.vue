@@ -1,8 +1,8 @@
 <script setup>
-import {Link} from '@inertiajs/vue3'
+import { Link } from '@inertiajs/vue3'
 
 defineProps({
-    group:Object,
+    group: Object,
 
 })
 </script>
@@ -10,23 +10,22 @@ defineProps({
 <template>
     <div class="mb-3 cursour-pointer hover:bg-gray-100">
 
+    
+    <Link :href="route('group.profile', group.slug)" class="flex itme-start gap-1 py-2 px-2 ">
+    <img :src="group.thumbnail_url" class="w-[32px] h-[32px] rounded-full">
+    <div class="flex-1">
+        <div class="flex items-center justify-between">
+            <h3 class="font-black">{{ group.name }}</h3>
+        </div>
+        <div class="text-xs text-gray-500" v-html="group.description"></div>
+        <span class="text-xs">
+            {{ group.status === 'approved' ? (group.role === 'admin' ? group.role : '') : 'not approved' }}
+        </span>
     </div>
-    <div class ="flex itme-start gap-1 py-2 px-2 ">
-        <img :src="group.thumbnail_url" class="w-[32px] h-[32px] rounded-full">
-        <div class="flex-1">
-                <div class="flex items-center justify-between">
-                    <h3 class="font-black">{{ group.name }}</h3>
-                </div>
-               <div class="text-xs text-gray-500" v-html="group.description"></div>
-                <span class="text-xs">
-                    {{ group.status === 'approved' ? (group.role === 'admin' ? group.role : '') : 'not approved' }}
-                </span>
-            </div>
 
 
-    </div>
+    </Link>
+    </div >
 </template>
 
-<style scoped>
-
-</style>
+<style scoped></style>
