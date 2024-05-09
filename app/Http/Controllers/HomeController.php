@@ -6,6 +6,9 @@ use Illuminate\Http\Request;
 use App\Models\Post;
 use App\Http\Resources\PostResource;
 use Illuminate\Support\Facades\Auth;
+use App\Models\Group;
+use App\Http\Enums\GroupUserStatus;
+use App\Http\Resources\GroupResource;
 
 use Inertia\Inertia;
 
@@ -34,6 +37,20 @@ class HomeController extends Controller
         if ($request->wantsJson()) {
             return $posts;
         }
-        return Inertia::render('Home',['posts'=>$posts]);
+
+
+        $groups = Group::query()
+        ->select(['groups.*','gu.status','gu.role'])
+        ->join('group_users AS gu', 'gu.group_id', 'groups.id')
+        ->where('gu.user_id', Auth::id())
+        // ->where('status', GroupUserStatus ::APPROVED->value)
+        ->orderBy('gu.role')
+        ->orderBy('name', 'desc')
+        ->get();
+
+        return Inertia::render('Home', [
+            'posts' => $posts,
+            'groups' => GroupResource::collection($groups),
+        ]);
     }
 }

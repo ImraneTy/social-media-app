@@ -5,10 +5,21 @@ import GroupModal from "@/Components/app/GroupModal.vue";
 import {ref} from "vue";
  
 
-
+const props=defineProps({
+    groups: Object,
+})
 
 const searchKeyword = ref('');
 const showNewGroupModal = ref(false)
+
+
+
+
+
+function onGroupCreate(group) {
+    props.groups.unshift(group)
+}
+
 
 </script>
 
@@ -27,45 +38,9 @@ const showNewGroupModal = ref(false)
                         You are not joined to any groupes
                 </div>
                 <div v-else>
-                        <GroupItem image="https://picsum.photos/100" title="Laravel Developers" description=" hello hello hellohello 
-                    hello hello hello hello hello hello hello " />
-                        <GroupItem image="https://picsum.photos/100" title="Laravel Developers" description=" hello hello hellohello 
-                    hello hello hello hello hello hello hello " />
-                        <GroupItem image="https://picsum.photos/100" title="Laravel Developers" description=" hello hello hellohello 
-                    hello hello hello hello hello hello hello " />
-                        <GroupItem image="https://picsum.photos/100" title="Laravel Developers" description=" hello hello hellohello 
-                    hello hello hello hello hello hello hello " />
-                        <GroupItem image="https://picsum.photos/100" title="Laravel Developers" description=" hello hello hellohello 
-                    hello hello hello hello hello hello hello " />
-                        <GroupItem image="https://picsum.photos/100" title="Laravel Developers" description=" hello hello hellohello 
-                    hello hello hello hello hello hello hello " />
-                        <GroupItem image="https://picsum.photos/100" title="Laravel Developers" description=" hello hello hellohello 
-                    hello hello hello hello hello hello hello " />
-                        <GroupItem image="https://picsum.photos/100" title="Laravel Developers" description=" hello hello hellohello 
-                    hello hello hello hello hello hello hello " />
-                        <GroupItem image="https://picsum.photos/100" title="Laravel Developers" description=" hello hello hellohello 
-                    hello hello hello hello hello hello hello " />
-                        <GroupItem image="https://picsum.photos/100" title="Laravel Developers" description=" hello hello hellohello 
-                    hello hello hello hello hello hello hello " />
-                        <GroupItem image="https://picsum.photos/100" title="Laravel Developers" description=" hello hello hellohello 
-                    hello hello hello hello hello hello hello " />
-                        <GroupItem image="https://picsum.photos/100" title="Laravel Developers" description=" hello hello hellohello 
-                    hello hello hello hello hello hello hello " />
-                        <GroupItem image="https://picsum.photos/100" title="Laravel Developers" description=" hello hello hellohello 
-                    hello hello hello hello hello hello hello " />
-                        <GroupItem image="https://picsum.photos/100" title="Laravel Developers" description=" hello hello hellohello 
-                    hello hello hello hello hello hello hello " />
-                        <GroupItem image="https://picsum.photos/100" title="Laravel Developers" description=" hello hello hellohello 
-                    hello hello hello hello hello hello hello " />
-                        <GroupItem image="https://picsum.photos/100" title="Laravel Developers" description=" hello hello hellohello 
-                    hello hello hello hello hello hello hello " />
-                        <GroupItem image="https://picsum.photos/100" title="Laravel Developers" description=" hello hello hellohello 
-                    hello hello hello hello hello hello hello " />
-                        <GroupItem image="https://picsum.photos/100" title="Laravel Developers" description=" hello hello hellohello 
-                    hello hello hello hello hello hello hello " />
-                        <GroupItem image="https://picsum.photos/100" title="Laravel Developers" description=" hello hello hellohello 
-                    hello hello hello hello hello hello hello " />
+                    <GroupItem v-for="group of groups" :group="group"/>
+                      
                 </div>
         </div>
-        <GroupModal v-model="showNewGroupModal"/>
+        <GroupModal v-model="showNewGroupModal" @create="onGroupCreate" />
 </template>

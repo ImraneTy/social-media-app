@@ -3,7 +3,9 @@
 import GroupListItems from "@/Components/app/GroupListItems.vue";
 import { Disclosure, DisclosureButton, DisclosurePanel } from '@headlessui/vue'
 
-
+defineProps({
+    groups: Array
+})
 
 </script>
 
@@ -27,7 +29,7 @@ import { Disclosure, DisclosureButton, DisclosurePanel } from '@headlessui/vue'
 
                 <DisclosurePanel>
 
-                    <GroupListItems />
+                    <GroupListItems :groups="groups"/>
                 </DisclosurePanel>
 
             </Disclosure>
@@ -36,9 +38,8 @@ import { Disclosure, DisclosureButton, DisclosurePanel } from '@headlessui/vue'
         <div class="h-full overflow-hidden flex-col hidden  lg:flex">
             <div class="flex justify-between">
                 <h2 class="text-xl font-bold ">My Groupes</h2>
-x
             </div>
-            <GroupListItems />
+            <GroupListItems :groups="groups" />
         </div>
     </div>
 

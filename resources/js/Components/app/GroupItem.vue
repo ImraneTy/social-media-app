@@ -2,9 +2,8 @@
 import {Link} from '@inertiajs/vue3'
 
 defineProps({
-    image: String ,
-    title: String,
-    description:String
+    group:Object,
+
 })
 </script>
 
@@ -13,11 +12,16 @@ defineProps({
 
     </div>
     <div class ="flex itme-start gap-1 py-2 px-2 ">
-        <img :src="image" class="w-[32px] h-[32px] rounded-full">
-        <div>
-            <h3 class="font-black text-lg">{{ title }}</h3>
-            <div class="text-xs text-gray-500">{{ description }}</div>
-        </div>
+        <img :src="group.thumbnail_url" class="w-[32px] h-[32px] rounded-full">
+        <div class="flex-1">
+                <div class="flex items-center justify-between">
+                    <h3 class="font-black">{{ group.name }}</h3>
+                </div>
+               <div class="text-xs text-gray-500" v-html="group.description"></div>
+                <span class="text-xs">
+                    {{ group.status === 'approved' ? (group.role === 'admin' ? group.role : '') : 'not approved' }}
+                </span>
+            </div>
 
 
     </div>
