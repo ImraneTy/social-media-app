@@ -96,6 +96,14 @@ function submitThumbnailImage() {
     })
 }
 
+function joinToGroup() {
+    const form = useForm({})
+
+    form.post(route('group.join', props.group.slug), {
+        preserveScroll: true
+    })
+}
+
 </script>
 
 

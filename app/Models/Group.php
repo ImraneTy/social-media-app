@@ -10,6 +10,8 @@ use Spatie\Sluggable\HasSlug;
 use App\Models\GroupUser;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use App\Http\Enums\GroupUserRole;
 
 class Group extends Model
 {
@@ -33,9 +35,21 @@ class Group extends Model
     {
         return $this->hasOne(GroupUser::class)->where('user_id', Auth::id());
     }
+
+
     public function isAdmin($userId): bool
     {
         return $this->currentUserGroup->user_id=$userId;
+    }
+
+
+
+
+
+    public function adminUsers(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'group_users')
+            ->wherePivot('role', GroupUserRole::ADMIN->value);
     }
 
 }
