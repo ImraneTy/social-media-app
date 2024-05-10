@@ -1,6 +1,6 @@
 <script setup>
 import TextInput from "@/Components/TextInput.vue";
-import FollowingItem from "@/Components/app/FollowingItem.vue";
+import UserListItem from "@/Components/app/UserListItem.vue";
 import { ref } from 'vue';
 const searchKeyword = ref('')
 </script>
@@ -12,19 +12,7 @@ const searchKeyword = ref('')
                 You don't have any friends yet
             </div>
             <div v-else>
-                <FollowingItem image="https://picsum.photos/100" title="Juon Doe" />
-                <FollowingItem image="https://picsum.photos/100" title="Elon Musk" />                <FollowingItem image="https://picsum.photos/100" title="Juon Doe" />
-                <FollowingItem image="https://picsum.photos/100" title="Elon Musk" />                <FollowingItem image="https://picsum.photos/100" title="Juon Doe" />
-                <FollowingItem image="https://picsum.photos/100" title="Elon Musk" />                <FollowingItem image="https://picsum.photos/100" title="Juon Doe" />
-                <FollowingItem image="https://picsum.photos/100" title="Elon Musk" />                <FollowingItem image="https://picsum.photos/100" title="Juon Doe" />
-                <FollowingItem image="https://picsum.photos/100" title="Elon Musk" />                <FollowingItem image="https://picsum.photos/100" title="Juon Doe" />
-                <FollowingItem image="https://picsum.photos/100" title="Elon Musk" />                <FollowingItem image="https://picsum.photos/100" title="Juon Doe" />
-                <FollowingItem image="https://picsum.photos/100" title="Elon Musk" />                <FollowingItem image="https://picsum.photos/100" title="Juon Doe" />
-                <FollowingItem image="https://picsum.photos/100" title="Elon Musk" />                <FollowingItem image="https://picsum.photos/100" title="Juon Doe" />
-                <FollowingItem image="https://picsum.photos/100" title="Elon Musk" />                <FollowingItem image="https://picsum.photos/100" title="Juon Doe" />
-                <FollowingItem image="https://picsum.photos/100" title="Elon Musk" />                <FollowingItem image="https://picsum.photos/100" title="Juon Doe" />
-                <FollowingItem image="https://picsum.photos/100" title="Elon Musk" />                <FollowingItem image="https://picsum.photos/100" title="Juon Doe" />
-                <FollowingItem image="https://picsum.photos/100" title="Elon Musk" />
+
             </div>
         </div>
 </template>
