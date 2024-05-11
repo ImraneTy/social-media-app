@@ -16,6 +16,9 @@ use App\Models\Reaction;
 use App\Models\PostComment;
 use App\Http\Resources\CommentResource;
 use App\Http\Requests\UpdateCommentRequest;
+use App\Notifications\CommentDeleted;
+use App\Notifications\PostDeleted;
+
 
 
 
@@ -123,15 +126,19 @@ class PostController extends Controller
      */
     public function destroy(Post $post)
     {
-        //todo
         $id = Auth::id();
 
-        if($post->user_id !==$id){
-            return response("you have no permition to delete this post",403);
-        }
-        $post->delete(); 
-        return back();
+        if ($post->isOwner($id) || $post->group && $post->group->isAdmin($id)) {
+            $post->delete();
 
+            if (!$post->isOwner($id)) {
+                $post->user->notify(new PostDeleted($post->group));
+            }
+
+            return back();
+        }
+
+        return response("You don't have permission to delete this post", 403);
     }
     public function downloadAttachment(PostAttachment $attachment)
     {
@@ -188,11 +195,21 @@ class PostController extends Controller
     }
 
     public function deleteComment(PostComment $comment){
-        if ($comment->user_id!== Auth::id()){
-            return response("you don't have permision to delete this comment.",403);
-        }
+        $post = $comment->post;
+        $id = Auth::id();
+        if ( $post->isOwner($id)||$post->group && $post->group->isAdmin($id)){
             $comment->delete();
+
+            if (!$comment->isOwner($id)) {
+                $comment->user->notify(new CommentDeleted($comment, $post));
+            }
+
             return response('',204);
+
+        }
+            
+            return response("you don't have permision to delete this comment.",403);
+
        
     }
 

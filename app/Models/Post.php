@@ -66,4 +66,9 @@ class Post extends Model
             ])
             ->latest(); // Orders posts by created_at in descending order
     }
+
+    public function isOwner($userId): bool
+    {
+        return $this->user_id == $userId;
+    }
 }

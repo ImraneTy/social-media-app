@@ -78,7 +78,7 @@ function sendReaction() {
 
             <PostUserHeader :post="post" />
 
-            <EditDeleteDropdown :user="post.user" @edit="openEditModal" @delete="deletePost" />
+            <EditDeleteDropdown :user="post.user" :post="post" @edit="openEditModal" @delete="deletePost" />
 
 
 
