@@ -155,6 +155,18 @@ function updateGroup() {
         preserveScroll: true
     })
 }
+function deleteUser(user) {
+    if (!window.confirm(`Are you sure you want to remove user "${user.name}" from this group?`)) {
+        return false;
+    }
+
+    const form = useForm({
+        user_id: user.id,
+    })
+    form.delete(route('group.removeUser', props.group.slug), {
+        preserveScroll: true
+    })
+}
 </script>
 
 
@@ -291,13 +303,17 @@ function updateGroup() {
 
                         <TabPanel v-if="isJoinedToGroup">
                             <div class="mb-3">
-                                <TextInput :model-value="searchKeyword" placeholder="Type to search" class="w-full" />
+                                <TextInput :model-value="searchKeyword" placeholder="Type to search" class="w-full"/>
                             </div>
                             <div class="grid grid-cols-2 gap-3">
-                                <UserListItem v-for="user of users" :user="user" :key="user.id"
-                                    :show-role-dropdown="isCurrentUserAdmin"
-                                    :disable-role-dropdown="group.user_id === user.id" class="shadow rounded-lg"
-                                    @role-change="onRoleChange" />
+                                <UserListItem v-for="user of users"
+                                              :user="user"
+                                              :key="user.id"
+                                              :show-role-dropdown="isCurrentUserAdmin"
+                                              :disable-role-dropdown="group.user_id === user.id"
+                                              class="shadow rounded-lg"
+                                              @role-change="onRoleChange"
+                                              @delete="deleteUser"/>
                             </div>
                         </TabPanel>
                         <TabPanel v-if="isCurrentUserAdmin" class="bg-white p-3 focus:ring-2 shadow">
