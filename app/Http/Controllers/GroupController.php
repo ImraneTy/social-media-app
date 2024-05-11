@@ -26,6 +26,8 @@ use App\Http\Resources\GroupUserResource;
 use App\Models\User;
 use Illuminate\Validation\Rule;
 use App\Notifications\RoleChanged;
+use App\Models\Post;
+use App\Http\Resources\PostResource;
 
 
 
@@ -34,9 +36,29 @@ class GroupController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function profile(Group $group)
+    public function profile(Request $request , Group $group)
     {
         $group->load('currentUserGroup');
+        $userId=Auth::id();
+
+
+        if ($group->hasApprovedUser($userId)) {
+            $posts = Post::postsForTimeline($userId, false)
+                ->where('group_id', $group->id)
+                ->paginate(10);
+            $posts = PostResource::collection($posts);
+        } else {
+            return Inertia::render('Group/View', [
+                'success' => session('success'),
+                'group' => new GroupResource($group),
+                'posts' => null,
+                'users' => [],
+                'requests' => []
+            ]);
+        }
+        if ($request->wantsJson()) {
+            return  PostResource::collection($posts);
+        }
 
         $users = User::query()
         ->select(['users.*', 'gu.role', 'gu.status', 'gu.group_id'])
@@ -47,13 +69,16 @@ class GroupController extends Controller
         $requests = $group->pendingUsers()->orderBy('name')->get();
 
 
-        return Inertia::render('Group/View', [
 
+        return Inertia::render('Group/View', [
             'success' => session('success'),
-            'group'=>new GroupResource($group),
+            'group' => new GroupResource($group),
+            'posts' => $posts,
             'users' => GroupUserResource::collection($users),
             'requests' => UserResource::collection($requests),
         ]);
+
+
     }
 
     /**

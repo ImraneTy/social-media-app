@@ -9,13 +9,16 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Database\Eloquent\Builder;
+
+
 class Post extends Model
 {
     use HasFactory;
     use softDeletes;
 
 
-    protected $fillable=['user_id','body'];
+    protected $fillable=['user_id','body','group_id'];
 
     public function user(): BelongsTo
     {
@@ -45,4 +48,22 @@ class Post extends Model
         return $this->hasMany(PostComment::class);
     }
 
+
+
+
+
+    public static function postsForTimeline($userId): Builder
+    {
+        return Post::query() // SELECT * FROM posts
+            ->withCount('reactions') // Counts all reactions associated with each post
+            ->with([
+                'comments' => function ($query) {
+                    $query->withCount('reactions'); // Counts reactions for each comment
+                },
+                'reactions' => function ($query) use ($userId) {
+                    $query->where('user_id', $userId); // Filters reactions by user_id
+                }
+            ])
+            ->latest(); // Orders posts by created_at in descending order
+    }
 }

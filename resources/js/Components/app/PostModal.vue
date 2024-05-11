@@ -24,15 +24,16 @@ const attachmentExtensions = usePage().props.attachmentExtensions;
 
 
 const props = defineProps({
-
-
-  post: {
-    type: Object,
-    required: true
-  },
-  modelValue: Boolean
-}
-)
+    post: {
+        type: Object,
+        required: true
+    },
+    group: {
+        type: Object,
+        default: null
+    },
+    modelValue: Boolean
+})
 
 
 
@@ -42,11 +43,11 @@ const formErrors = ref({});
 
 
 const form = useForm({
-  body: '',
-  attachments: [],
-  deleted_file_ids: [],
-  _method: 'POST'
-
+    body: '',
+    group_id: null,
+    attachments: [],
+    deleted_file_ids: [],
+    _method: 'POST'
 })
 const show = computed({
   get: () => props.modelValue,
@@ -214,7 +215,10 @@ function undoDelete(myFile) {
                 <div class=" p-4">
                   <PostUserHeader :post="post" :show-time="false" class="mb-4" />
 
-
+                  <div v-if="formErrors.group_id"
+                 class="bg-red-400 py-2 px-3 rounded text-white mb-3">
+                {{ formErrors.group_id }}
+            </div>
 
                   <ckeditor :editor="editor" v-model="form.body" :config="editorConfig"></ckeditor>
                   <div v-if="showExtentionsText" class="border-l-4 border-amber-500 py-2 px-3 bg-amber-100 mt-3 text-gray-800">
@@ -224,6 +228,8 @@ function undoDelete(myFile) {
                  
 
                 </div> 
+
+                
                 <div v-if="formErrors.attachments"
                  class="border-l-4 border-red-500 py-2 px-3 bg-red-100 mt-3 text-gray-800">
                 {{ formErrors.attachments }}

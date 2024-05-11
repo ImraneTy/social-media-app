@@ -11,6 +11,8 @@ import InviteUserModal from "@/Pages/Group/InviteUserModal.vue";
 import UserListItem from "@/Components/app/UserListItem.vue";
 import TextInput from "@/Components/TextInput.vue";
 import GroupForm from "@/Components/app/GroupForm.vue";
+import PostList from "@/Components/app/PostList.vue";
+import CreatePost from "@/Components/app/CreatePost.vue";
 
 
 
@@ -46,6 +48,7 @@ const props = defineProps({
     group: {
         type: Object
     },
+    posts: Object,
     users: Array,
     requests: Array
 });
@@ -161,98 +164,87 @@ function updateGroup() {
     <AuthenticatedLayout>
         <div class="max-w-[800px]  mx-auto h-full overflow-auto  ">
             <div class="px-4">
-                <div
-                    v-show="showNotification && success"
-                    class="my-2 py-2 px-3 font-medium text-sm bg-emerald-500 text-white"
-                >
+                <div v-show="showNotification && success"
+                    class="my-2 py-2 px-3 font-medium text-sm bg-emerald-500 text-white">
                     {{ success }}
                 </div>
-                <div
-                    v-if="errors.cover"
-                    class="my-2 py-2 px-3 font-medium text-sm bg-red-400 text-white"
-                >
+                <div v-if="errors.cover" class="my-2 py-2 px-3 font-medium text-sm bg-red-400 text-white">
                     {{ errors.cover }}
                 </div>
                 <div class="group relative bg-white ">
                     <img :src="coverImageSrc || group.cover_url || '/img/default_cover.jpeg'"
-                    class="w-full h-[200px]  object-cover">
+                        class="w-full h-[200px]  object-cover">
                     <div v-if="isCurrentUserAdmin" class="absolute top-2 right-2 ">
-                        <button
-                            v-if="!coverImageSrc"
+                        <button v-if="!coverImageSrc"
                             class="bg-gray-50 hover:bg-gray-100 text-gray-800 py-1 px-2 text-xs flex items-center opacity-0 group-hover:opacity-100">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                                 stroke="currentColor" class="w-3 h-3 mr-2">
+                                stroke="currentColor" class="w-3 h-3 mr-2">
                                 <path stroke-linecap="round" stroke-linejoin="round"
-                                      d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z"/>
+                                    d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" />
                                 <path stroke-linecap="round" stroke-linejoin="round"
-                                      d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0zM18.75 10.5h.008v.008h-.008V10.5z"/>
+                                    d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0zM18.75 10.5h.008v.008h-.008V10.5z" />
                             </svg>
 
                             Update Cover Image
                             <input type="file" class="absolute left-0 top-0 bottom-0 right-0 opacity-0"
-                                   @change="onCoverChange"/>
+                                @change="onCoverChange" />
                         </button>
                         <div v-else class="flex gap-2 bg-white p-2 opacity-0 group-hover:opacity-100">
-                            <button
-                                @click="resetCoverImage"
+                            <button @click="resetCoverImage"
                                 class="bg-gray-50 hover:bg-gray-100 text-gray-800 py-1 px-2 text-xs flex items-center">
-                                <XMarkIcon class="h-3 w-3 mr-2"/>
+                                <XMarkIcon class="h-3 w-3 mr-2" />
                                 Cancel
                             </button>
-                            <button
-                                @click="submitCoverImage"
+                            <button @click="submitCoverImage"
                                 class="bg-gray-800 hover:bg-gray-900 text-gray-100 py-1 px-2 text-xs flex items-center">
-                                <CheckCircleIcon class="h-3 w-3 mr-2"/>
+                                <CheckCircleIcon class="h-3 w-3 mr-2" />
                                 Submit
                             </button>
                         </div>
                     </div>
                     <div class="flex ">
-                    <div
-                        class=" flex items-center justify-center relative group/thumbnail -mt-[64px] ml-[48px] w-[128px] h-[128px]  ">
-                        <img :src="thumbnailImageSrc || group.thumbnail_url || '/img/defaulte_avatar.png'"
-                            class=" w-full h-full object-cover rounded-full ">
+                        <div
+                            class=" flex items-center justify-center relative group/thumbnail -mt-[64px] ml-[48px] w-[128px] h-[128px]  ">
+                            <img :src="thumbnailImageSrc || group.thumbnail_url || '/img/defaulte_avatar.png'"
+                                class=" w-full h-full object-cover rounded-full ">
 
 
-                        <button v-if="isCurrentUserAdmin && !thumbnailImageSrc"
-                            class=" absolute left-0 top-0 right-0 bottom-0 bg-black/25 opacity-0 text-white rounded-full  flex items-center justify-center group-hover/thumbnail:opacity-100 ">
-                            <CameraIcon class="h-8 w-8" />
+                            <button v-if="isCurrentUserAdmin && !thumbnailImageSrc"
+                                class=" absolute left-0 top-0 right-0 bottom-0 bg-black/25 opacity-0 text-white rounded-full  flex items-center justify-center group-hover/thumbnail:opacity-100 ">
+                                <CameraIcon class="h-8 w-8" />
 
-                            <input type="file" class="absolute left-0 top-0 bottom-0 right-0 opacity-0 "
-                                @change="OnThumbnailChange">
-                        </button>
-                        <div v-else-if="isCurrentUserAdmin" class="absolute top-1 right-1 flex flex-col gap-2  ">
-                            <button @click="resetlThumbnailImage"
-                                class="w-7 h-7 flex items-center justify-center bg-red-500/80 text-white rounded-full">
-                                <XMarkIcon class="h-5 w-5 " />
+                                <input type="file" class="absolute left-0 top-0 bottom-0 right-0 opacity-0 "
+                                    @change="OnThumbnailChange">
                             </button>
-                            <button @click="submitThumbnailImage"
-                                class="w-7 h-7 flex items-center justify-center bg-emerald-500/80 text-white rounded-full">
+                            <div v-else-if="isCurrentUserAdmin" class="absolute top-1 right-1 flex flex-col gap-2  ">
+                                <button @click="resetlThumbnailImage"
+                                    class="w-7 h-7 flex items-center justify-center bg-red-500/80 text-white rounded-full">
+                                    <XMarkIcon class="h-5 w-5 " />
+                                </button>
+                                <button @click="submitThumbnailImage"
+                                    class="w-7 h-7 flex items-center justify-center bg-emerald-500/80 text-white rounded-full">
 
-                                <CheckCircleIcon class="h-5 w-5 " />
-                            </button>
+                                    <CheckCircleIcon class="h-5 w-5 " />
+                                </button>
+                            </div>
+
+
+
                         </div>
-
-
-
-                    </div>
-                    <div class="flex justify-between items-center flex-1 p-4">
+                        <div class="flex justify-between items-center flex-1 p-4">
                             <h2 class="font-bold text-lg">{{ group.name }}</h2>
 
                             <PrimaryButton v-if="!authUser" :href="route('login')">
                                 Login to join to this group
                             </PrimaryButton>
 
-                            <PrimaryButton v-if="isCurrentUserAdmin"
-                                           @click="showInviteUserModal = true">
+                            <PrimaryButton v-if="isCurrentUserAdmin" @click="showInviteUserModal = true">
                                 Invite Users
                             </PrimaryButton>
-                            <PrimaryButton v-if="authUser && !group.role && group.auto_approval"
-                                           @click="joinToGroup">
+                            <PrimaryButton v-if="authUser && !group.role && group.auto_approval" @click="joinToGroup">
                                 Join to Group
                             </PrimaryButton>
-                            <PrimaryButton v-if="authUser && !group.role && !group.auto_approval"
-                                           @click="joinToGroup">
+                            <PrimaryButton v-if="authUser && !group.role && !group.auto_approval" @click="joinToGroup">
                                 Request to join
                             </PrimaryButton>
                         </div>
@@ -276,8 +268,8 @@ function updateGroup() {
                         <Tab v-slot="{ selected }" as="template">
                             <TabItem text="Photos" :selected="selected" />
                         </Tab>
-                        <Tab v-slot="{ selected }" as="template">
-                            <TabItem text="About" :selected="selected" />
+                        <Tab v-if="isCurrentUserAdmin" v-slot="{ selected }" as="template">
+                            <TabItem text="About" :selected="selected"/>
                         </Tab>
                     </TabList>
 
@@ -285,7 +277,16 @@ function updateGroup() {
 
 
                         <TabPanel class="bg-white p-3 focus:ring-2 shadow">
-                            posts
+                            <template v-if="posts">
+                                <CreatePost :group="group" />
+                                <PostList v-if="posts.data.length" :posts="posts.data" class="flex-1" />
+                                <div v-else class="py-8 text-center">
+                                    There are no posts in this group. Be the first and create it.
+                                </div>
+                            </template>
+                            <div v-else class="py-8 text-center">
+                                You don't have permission to view these posts.
+                            </div>
                         </TabPanel>
 
                         <TabPanel v-if="isJoinedToGroup">
@@ -293,14 +294,10 @@ function updateGroup() {
                                 <TextInput :model-value="searchKeyword" placeholder="Type to search" class="w-full" />
                             </div>
                             <div class="grid grid-cols-2 gap-3">
-                                <UserListItem v-for="user of users"
-                                              :user="user"
-                                              :key="user.id"
-                                              :show-role-dropdown="isCurrentUserAdmin"
-                                              :disable-role-dropdown="group.user_id === user.id"
-                                              class="shadow rounded-lg"
-                                              @role-change="onRoleChange"
-                                              />
+                                <UserListItem v-for="user of users" :user="user" :key="user.id"
+                                    :show-role-dropdown="isCurrentUserAdmin"
+                                    :disable-role-dropdown="group.user_id === user.id" class="shadow rounded-lg"
+                                    @role-change="onRoleChange" />
                             </div>
                         </TabPanel>
                         <TabPanel v-if="isCurrentUserAdmin" class="bg-white p-3 focus:ring-2 shadow">
@@ -316,11 +313,14 @@ function updateGroup() {
                         <TabPanel class="bg-white p-3 focus:ring-2 shadow">
                             images
                         </TabPanel>
-                        <TabPanel class="bg-white p-3 focus:ring-2 shadow">
-                            <GroupForm :form="aboutForm"/>
-                            <PrimaryButton @click="updateGroup">
+                        <TabPanel>
+                            <template v-if="isCurrentUserAdmin">
+                                <GroupForm :form="aboutForm"/>
+                                <PrimaryButton @click="updateGroup">
                                     Submit
                                 </PrimaryButton>
+                            </template>
+
                         </TabPanel>
 
 

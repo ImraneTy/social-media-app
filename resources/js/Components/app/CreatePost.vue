@@ -6,7 +6,12 @@ import InputTextarea from '../InputTextarea.vue';
 import PostModal from "@/Components/app/PostModal.vue";
 
 
-
+defineProps({
+    group: {
+        type: Object,
+        default: null
+    }
+})
 
 const authUser =usePage().props.auth.user
 const showModal=ref(false)
@@ -41,7 +46,7 @@ function showCreatePostModal(){
              @click="submit" type="button" class="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">Submit</button>
  
         </div> -->
-        <PostModal :post="newPost" v-model="showModal"/>
+        <PostModal :post="newPost" :group="group" v-model="showModal"/>
 
     </div>
 

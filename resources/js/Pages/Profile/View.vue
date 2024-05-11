@@ -74,12 +74,10 @@ function resetlAvatarImage() {
 
 }
 function submitCoverImage() {
-    console.log(imagesForm.cover)
     imagesForm.post(route('profile.updateImages'), {
-        preserveScroll=true,
+        preserveScroll: true,
         onSuccess: (user) => {
             showNotification.value = true
-            console.log(user)
             resetCoverImage()
             setTimeout(() => {
                 showNotification.value = false
@@ -87,14 +85,13 @@ function submitCoverImage() {
         },
     })
 }
+
 function submitAvatarImage() {
-    console.log(imagesForm.cover)
     imagesForm.post(route('profile.updateImages'), {
-        preserveScroll=true,
+        preserveScroll: true,
         onSuccess: (user) => {
             showNotification.value = true
-            console.log(user)
-            resetlAvatarImage()
+            resetAvatarImage()
             setTimeout(() => {
                 showNotification.value = false
             }, 3000)
