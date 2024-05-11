@@ -18,6 +18,13 @@ use App\Http\Resources\CommentResource;
 use App\Http\Requests\UpdateCommentRequest;
 use App\Notifications\CommentDeleted;
 use App\Notifications\PostDeleted;
+use App\Notifications\PostCreated;
+use Illuminate\Support\Facades\Notification;
+use App\Http\Resources\PostResource;
+use App\Notifications\CommentCreated;
+use App\Notifications\ReactionAddedOnPost;
+use App\Models\User;
+use App\Notifications\ReactionAddedOnComment;
 
 
 
@@ -25,7 +32,26 @@ use App\Notifications\PostDeleted;
 class PostController extends Controller
 {
 
- 
+    public function view(Request $request, Post $post)
+    {
+        if ($post->group_id && !$post->group->hasApprovedUser(Auth::id())) {
+            return inertia('Error', [
+                'title' => 'Permission Denied',
+                'body' => "You don't have permission to view that post"
+            ])->toResponse($request)->setStatusCode(403);
+        }
+        $post->loadCount('reactions');
+        $post->load([
+            'comments' => function ($query) {
+                $query->withCount('reactions'); // SELECT * FROM comments WHERE post_id IN (1, 2, 3...)
+                // SELECT COUNT(*) from reactions
+            },
+        ]);
+
+        return inertia('Post/View', [
+            'post' => new PostResource($post)
+        ]);
+    }
 
 
     /**
@@ -57,6 +83,12 @@ class PostController extends Controller
             }
 
             DB::commit();
+            $group = $post->group;
+
+            if ($group) {
+                $users = $group->approvedUsers()->where('users.id', '!=', $user->id)->get();
+                Notification::send($users, new PostCreated($post, $user, $group));
+            }
     } catch (\Exception $e) {
         foreach ($allFilePaths as $path) {
             Storage::disk('public')->delete($path);
@@ -164,10 +196,13 @@ class PostController extends Controller
             'user_id'=>$userId,
             'type'=>$data['reaction'],
         ]);  
+
+
+        if (!$post->isOwner($userId)) {
+            $user = User::where('id', $userId)->first();
+            $post->user->notify(new ReactionAddedOnPost($post, $user));
         }
-
-
-
+    }
 
         $reactions = Reaction::where('object_id', $post->id)->where('object_type', post::class)->count();
         return response([
@@ -189,6 +224,8 @@ class PostController extends Controller
             'parent_id'=>$data['parent_id']?: null
         ]);
 
+        $post = $comment->post;
+        $post->user->notify(new CommentCreated($comment, $post));
 
         return response(new CommentResource($comment), 201);
 
@@ -249,6 +286,10 @@ class PostController extends Controller
             'user_id' => $userId,
             'type' => $data['reaction']
         ]);
+        if (!$comment->isOwner($userId)) {
+            $user = User::where('id', $userId)->first();
+            $comment->user->notify(new ReactionAddedOnComment($comment->post, $comment, $user));
+        }
 
     }
 
