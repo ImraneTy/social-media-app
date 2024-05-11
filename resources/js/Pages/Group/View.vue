@@ -130,6 +130,18 @@ function rejectUser(user) {
     })
 }
 
+function onRoleChange(user, role) {
+    console.log(user, role)
+    const form = useForm({
+        user_id: user.id,
+        role
+    })
+    form.post(route('group.changeRole', props.group.slug), {
+        preserveScroll: true
+    })
+}
+
+
 </script>
 
 
@@ -251,9 +263,14 @@ function rejectUser(user) {
                                 <TextInput :model-value="searchKeyword" placeholder="Type to search" class="w-full" />
                             </div>
                             <div class="grid grid-cols-2 gap-3">
-                                <UserListItem v-for="user of users" :user="user" :key="user.id"
-                                    :show-role-dropdown="isCurrentUserAdmin"
-                                    :disable-role-dropdown="group.user_id === user.id" class="shadow rounded-lg" />
+                                <UserListItem v-for="user of users"
+                                              :user="user"
+                                              :key="user.id"
+                                              :show-role-dropdown="isCurrentUserAdmin"
+                                              :disable-role-dropdown="group.user_id === user.id"
+                                              class="shadow rounded-lg"
+                                              @role-change="onRoleChange"
+                                              />
                             </div>
                         </TabPanel>
                         <TabPanel v-if="isCurrentUserAdmin" class="bg-white p-3 focus:ring-2 shadow">
