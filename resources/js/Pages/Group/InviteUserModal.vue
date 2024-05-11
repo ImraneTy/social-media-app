@@ -13,7 +13,7 @@ import TextInput from "@/Components/TextInput.vue";
 import Checkbox from "@/Components/Checkbox.vue";
 import InputTextarea from "@/Components/InputTextarea.vue";
 import axiosClient from "@/axiosClient.js";
-// import BaseModal from "@/Components/app/BaseModal.vue";
+import BaseModal from "@/Components/app/BaseModal.vue";
 
 const props = defineProps({
     modelValue: Boolean
@@ -62,7 +62,7 @@ function submit() {
 </script>
 
 <template>
-    <!-- <BaseModal title="Invite Users" v-model="show" @hide="closeModal"> -->
+    <BaseModal title="Invite Users" v-model="show" @hide="closeModal">
         <div class="p-4">
             <div class="mb-3">
                 <label>Username or email</label>
@@ -95,6 +95,6 @@ function submit() {
                 Submit
             </button>
         </div>
-    <!-- </BaseModal> -->
+    </BaseModal>
 </template>
 
