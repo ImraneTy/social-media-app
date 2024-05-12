@@ -25,7 +25,7 @@ use App\Notifications\CommentCreated;
 use App\Notifications\ReactionAddedOnPost;
 use App\Models\User;
 use App\Notifications\ReactionAddedOnComment;
-
+use OpenAI\Laravel\Facades\OpenAI;
 
 
 
@@ -305,5 +305,24 @@ class PostController extends Controller
     ]);
 }
 
+public function aiPostContent(Request $request)
+{
+    $prompt = $request->get('prompt');
+
+    $result = OpenAI::chat()->create([
+        'model' => 'gpt-4',
+        'messages' => [
+            [
+                'role' => 'user',
+                'content' => "Please generate social media post content based on the following prompt. Generated formatted content with multiple paragraphs. Put hashtags after 2 lines from the main content" . PHP_EOL . PHP_EOL . "Prompt: " . PHP_EOL
+                    . $prompt
+            ],
+        ],
+    ]);
+
+    return response([
+        'content' => $result->choices[0]->message->content
+    ]);
+}
 
 }
