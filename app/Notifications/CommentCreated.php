@@ -42,7 +42,7 @@ class CommentCreated extends Notification
 //            ->greeting('Hello My Friend')
             ->line('User "'.$this->comment->user->username.'" has made a comment on your post. Please see comment bellow.')
             ->line('"' . $this->comment->comment . '"')
-            ->action('View Post', url('/'))
+            ->action('View Post', url(route('post.view', $this->post->id)))
             ->line('Thank you for using our application!')
 //            ->salutation("My salutation")
             ;

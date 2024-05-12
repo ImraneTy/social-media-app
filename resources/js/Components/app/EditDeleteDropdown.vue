@@ -38,6 +38,24 @@ const deleteAllowed = computed(() => {
 defineEmits(['edit', 'delete', 'pin'])
 
 
+
+function copyToClipboard() {
+    // Replace 'your-text-to-copy' with the actual text you want to copy
+    const textToCopy = route('post.view', props.post.id);
+
+    // Create a temporary element to copy the text
+    const tempInput = document.createElement('input');
+    tempInput.value = textToCopy;
+    document.body.appendChild(tempInput);
+
+    // Select the text in the temporary input
+    tempInput.select();
+    document.execCommand('copy');
+
+    // Remove the temporary input from the DOM
+    document.body.removeChild(tempInput);
+}
+
 </script>
 
 <template>
@@ -68,8 +86,35 @@ defineEmits(['edit', 'delete', 'pin'])
             >
                 <div class="px-1 py-1">
 
-
-
+                    <MenuItem  v-if="!comment" v-slot="{ active }">
+                        <Link :href="route('post.view', post.id)"
+                              :class="[
+                              active ? 'bg-indigo-500 text-white' : 'text-gray-900',
+                              'group flex w-full items-center rounded-md px-2 py-2 text-sm',
+                            ]"
+                        >
+                            <EyeIcon
+                                class="mr-2 h-5 w-5"
+                                aria-hidden="true"
+                            />
+                            Open Post
+                        </Link>
+                    </MenuItem>
+                    <MenuItem v-if="!comment" v-slot="{ active }">
+                        <button
+                            @click="copyToClipboard"
+                            :class="[
+                              active ? 'bg-indigo-500 text-white' : 'text-gray-900',
+                              'group flex w-full items-center rounded-md px-2 py-2 text-sm',
+                            ]"
+                        >
+                            <ClipboardIcon
+                                class="mr-2 h-5 w-5"
+                                aria-hidden="true"
+                            />
+                            Copy Post URL
+                        </button>
+                    </MenuItem>
 
                     <MenuItem v-if="editAllowed" v-slot="{ active }">
                         <button

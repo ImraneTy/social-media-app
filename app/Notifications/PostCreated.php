@@ -40,7 +40,7 @@ class PostCreated extends Notification
         return ( new MailMessage )
             ->lineIf(!!$this->group, 'New post was added by user "' . $this->user->username . '" in group "' . $this->group?->slug . '".')
             ->lineIf(!$this->group, 'New post was added by user "' . $this->user->username . '"')
-            ->action('View Post', url('/'))
+            ->action('View Post', url(route('post.view', $this->post->id)))
             ->line('Thank you for using our application!');
     }
 
