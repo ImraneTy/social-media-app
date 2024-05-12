@@ -29,6 +29,9 @@ use App\Notifications\RoleChanged;
 use App\Models\Post;
 use App\Http\Resources\PostResource;
 use App\Notifications\UserRemovedFromGroup;
+use App\Models\PostAttachment;
+use App\Http\Resources\PostAttachmentResource;
+
 
 
 
@@ -37,15 +40,16 @@ class GroupController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function profile(Request $request , Group $group)
+    public function profile(Request $request, Group $group)
     {
         $group->load('currentUserGroup');
-        $userId=Auth::id();
 
+        $userId = Auth::id();
 
         if ($group->hasApprovedUser($userId)) {
             $posts = Post::postsForTimeline($userId, false)
                 ->where('group_id', $group->id)
+                ->orderBy('posts.created_at', 'desc')
                 ->paginate(10);
             $posts = PostResource::collection($posts);
         } else {
@@ -57,17 +61,26 @@ class GroupController extends Controller
                 'requests' => []
             ]);
         }
+
         if ($request->wantsJson()) {
-            return  PostResource::collection($posts);
+            return $posts;
         }
 
         $users = User::query()
-        ->select(['users.*', 'gu.role', 'gu.status', 'gu.group_id'])
-        ->join('group_users AS gu', 'gu.user_id', 'users.id')
-        ->orderBy('users.name')
-        ->where('group_id', $group->id)
-        ->get();
+            ->select(['users.*', 'gu.role', 'gu.status', 'gu.group_id'])
+            ->join('group_users AS gu', 'gu.user_id', 'users.id')
+            ->orderBy('users.name')
+            ->where('group_id', $group->id)
+            ->get();
         $requests = $group->pendingUsers()->orderBy('name')->get();
+
+        $photos = PostAttachment::query()
+            ->select('post_attachments.*')
+            ->join('posts AS p', 'p.id', 'post_attachments.post_id')
+            ->where('p.group_id', $group->id)
+            ->where('mime', 'like', 'image/%')
+            ->latest()
+            ->get();
 
 
 
@@ -77,9 +90,8 @@ class GroupController extends Controller
             'posts' => $posts,
             'users' => GroupUserResource::collection($users),
             'requests' => UserResource::collection($requests),
+            'photos' => PostAttachmentResource::collection($photos)
         ]);
-
-
     }
 
     /**

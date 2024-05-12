@@ -184,7 +184,7 @@ function followUser() {
                 <div class="flex">
                         <div
                             class="flex items-center justify-center relative group/avatar -mt-[64px] ml-[48px] w-[128px] h-[128px] rounded-full">
-                            <img :src="avatarImageSrc || user.avatar_url || '/img/default_avatar.webp'"
+                            <img :src="avatarImageSrc || user.avatar_url || '/img/defaulte_avatar.png'"
                                  class="w-full h-full object-cover rounded-full">
                             <button
                                 v-if="!avatarImageSrc"
