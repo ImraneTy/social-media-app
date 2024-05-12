@@ -13,16 +13,57 @@ use Inertia\Inertia;
 use Inertia\Response;
 use App\Models\User;
 use App\Http\Resources\UserResource;
+use App\Models\Follower;
+use App\Models\Post;
+use App\Http\Resources\PostResource;
+use App\Models\PostAttachment;
+use App\Http\Resources\PostAttachmentResource;
 
 
 class ProfileController extends Controller
 {
-    public function index(User $user){
+    public function index(Request $request, User $user)
+    {
+        $isCurrentUserFollower = false;
+        if (!Auth::guest()) {
+            $isCurrentUserFollower = Follower::where('user_id', $user->id)->where('follower_id', Auth::id())->exists();
+        }
+        $followerCount = Follower::where('user_id', $user->id)->count();
+
+        $posts = Post::postsForTimeline(Auth::id(), false)
+
+            ->where('user_id', $user->id)
+            ->whereNull('group_id')
+
+            ->orderBy('posts.created_at', 'desc')
+            ->paginate(10);
+
+        $posts = PostResource::collection($posts);
+        if ($request->wantsJson()) {
+            return $posts;
+        }
+
+        $followers = $user->followers;
+
+        $followings = $user->followings;
+
+        $photos = PostAttachment::query()
+            ->where('mime', 'like', 'image/%')
+            ->where('created_by', $user->id)
+            ->latest()
+            ->get();
+
         return Inertia::render('Profile/View', [
             'mustVerifyEmail' => $user instanceof MustVerifyEmail,
             'status' => session('status'),
             'success' => session('success'),
-            'user'=>new UserResource($user)
+            'isCurrentUserFollower' => $isCurrentUserFollower,
+            'followerCount' => $followerCount,
+            'user' => new UserResource($user),
+            'posts' => $posts,
+            'followers' => UserResource::collection($followers),
+            'followings' => UserResource::collection($followings),
+            'photos' => PostAttachmentResource::collection($photos)
         ]);
     }
 

@@ -7,7 +7,12 @@ import { usePage, useForm } from "@inertiajs/vue3";
 import TabItem from '../../Components/app/TabItem.vue';
 import Edit from "@/Pages/Profile/Edit.vue";
 import PrimaryButton from "@/Components/PrimaryButton.vue";
-
+import DangerButton from "@/Components/DangerButton.vue";
+import CreatePost from "@/Components/app/CreatePost.vue";
+import PostList from "@/Components/app/PostList.vue";
+import TabPhotos from "@/Pages/Profile/TabPhotos.vue";
+import UserListItem from "@/Components/app/UserListItem.vue";
+import TextInput from "@/Components/TextInput.vue";
 
 
 const imagesForm = useForm({
@@ -20,6 +25,9 @@ const imagesForm = useForm({
 const showNotification = ref(true)
 const coverImageSrc = ref('')
 const avatarImageSrc = ref('')
+const searchFollowersKeyword = ref('')
+const searchFollowingsKeyword = ref('')
+
 const authUser = usePage().props.auth.user;
 const isMyProfile = computed(() => authUser && authUser.id === props.user.id)
 
@@ -34,9 +42,16 @@ const props = defineProps({
     success: {
         type: String,
     },
+    isCurrentUserFollower: Boolean,
+    followerCount: Number,
     user: {
         type: Object
-    }
+    },
+    posts: Object,
+    followers: Array,
+    followings: Array,
+    photos: Array
+
 });
 
 
@@ -99,6 +114,17 @@ function submitAvatarImage() {
     })
 }
 
+
+
+function followUser() {
+    const form = useForm({
+        follow: !props.isCurrentUserFollower
+    })
+
+    form.post(route('user.follow', props.user.id), {
+        preserveScroll: true
+    })
+}
 </script>
 
 
@@ -106,7 +132,7 @@ function submitAvatarImage() {
 
 <template>
     <AuthenticatedLayout>
-        <div class="max-w-[800px]  bg-white mx-auto h-full overflow-auto  ">
+        <div class="max-w-[800px]   mx-auto h-full overflow-auto  ">
             <div v-show="showNotification && success"
                 class="my-2 py-2 px-3 font-medium text-sm bg-emerald-500 text-white">
 {{ success }}
@@ -154,41 +180,50 @@ function submitAvatarImage() {
 
 
 
-                <div class="flex ">
 
+                <div class="flex">
+                        <div
+                            class="flex items-center justify-center relative group/avatar -mt-[64px] ml-[48px] w-[128px] h-[128px] rounded-full">
+                            <img :src="avatarImageSrc || user.avatar_url || '/img/default_avatar.webp'"
+                                 class="w-full h-full object-cover rounded-full">
+                            <button
+                                v-if="!avatarImageSrc"
+                                class="absolute left-0 top-0 right-0 bottom-0 bg-black/50 text-gray-200 rounded-full opacity-0 flex items-center justify-center group-hover/avatar:opacity-100">
+                                <CameraIcon class="w-8 h-8"/>
 
-                    <div class=" flex items-center justify-center relative group/avatar -mt-[64px] ml-[48px] w-[128px] h-[128px]  ">
-                        <img :src="avatarImageSrc || user.avatar_url || '/img/defaulte_avatar.png'"
-                            class=" w-full h-full object-cover rounded-full ">
-
-
-                            <button v-if="!avatarImageSrc"
-                                class=" absolute left-0 top-0 right-0 bottom-0 bg-black/25 opacity-0 text-white rounded-full  flex items-center justify-center group-hover/avatar:opacity-100 ">
-                                <CameraIcon class="h-8 w-8"/>
-
-                                <input type="file" class="absolute left-0 top-0 bottom-0 right-0 opacity-0 "
-                                    @change="onAvatarChange">
+                                <input type="file" class="absolute left-0 top-0 bottom-0 right-0 opacity-0"
+                                       @change="onAvatarChange"/>
                             </button>
-                            <div v-else class="absolute top-1 right-1 flex flex-col gap-2  ">
-                                <button @click="resetlAvatarImage"
+                            <div v-else class="absolute top-1 right-0 flex flex-col gap-2">
+                                <button
+                                    @click="resetAvatarImage"
                                     class="w-7 h-7 flex items-center justify-center bg-red-500/80 text-white rounded-full">
-                                    <XMarkIcon class="h-5 w-5 " />
+                                    <XMarkIcon class="h-5 w-5"/>
                                 </button>
-                                <button @click="submitAvatarImage"
-                                class="w-7 h-7 flex items-center justify-center bg-emerald-500/80 text-white rounded-full">
-
-                                    <CheckCircleIcon class="h-5 w-5 " />
+                                <button
+                                    @click="submitAvatarImage"
+                                    class="w-7 h-7 flex items-center justify-center bg-emerald-500/80 text-white rounded-full">
+                                    <CheckCircleIcon class="h-5 w-5"/>
                                 </button>
                             </div>
+                        </div>
+                        <div class="flex justify-between items-center flex-1 p-4">
+                            <div>
+                                <h2 class="font-bold text-lg">{{ user.name }}</h2>
+                                <p class="text-xs text-gray-500">{{ followerCount }} follower(s)</p>
+                            </div>
 
-
-
+                            <div v-if="!isMyProfile">
+                                <PrimaryButton v-if="!isCurrentUserFollower" @click="followUser">
+                                    {{ isCurrentUserFollower }}
+                                    Follow User
+                                </PrimaryButton>
+                                <DangerButton v-else @click="followUser">
+                                    Unfollow User
+                                </DangerButton>
+                            </div>
+                        </div>
                     </div>
-                    <div class="flex justify-between items-center  flex-1 p-4 ">
-                        <h2 class="font-bold  text-lg">{{ user.name }}</h2>
- 
-                    </div>
-                </div>
 
             </div>
             <div class="border-t-1">
@@ -215,25 +250,52 @@ function submitAvatarImage() {
                     <TabPanels class="mt-2">
 
 
-                        <TabPanel class="bg-white p-3 focus:ring-2 shadow">
-                            posts
+                        <TabPanel>
+                            <template v-if="posts">
+                                <CreatePost v-if="isMyProfile" />
+                                <PostList :posts="posts.data" class="flex-1"/>
+                            </template>
+                            <div v-else class="py-8 text-center dark:text-gray-100">
+                                You don't have permission to view these posts.
+                            </div>
                         </TabPanel>
 
-                        <TabPanel class="bg-white p-3 focus:ring-2 shadow">
-                            Followings
+                        <TabPanel>
+                            <div class="mb-3">
+                                <TextInput :model-value="searchFollowersKeyword" placeholder="Type to search"
+                                           class="w-full"/>
+                            </div>
+                            <div v-if="followers.length" class="grid grid-cols-2 gap-3">
+                                <UserListItem v-for="user of followers"
+                                              :user="user"
+                                              :key="user.id"
+                                              class="shadow rounded-lg"/>
+                            </div>
+                            <div v-else class="text-center py-8">
+                                User does not have followers.
+                            </div>
                         </TabPanel>
-
-                        <TabPanel class="bg-white p-3 focus:ring-2 shadow">
-                            Followers
+                        <TabPanel>
+                            <div class="mb-3">
+                                <TextInput :model-value="searchFollowingsKeyword" placeholder="Type to search"
+                                           class="w-full"/>
+                            </div>
+                            <div v-if="followings.length" class="grid grid-cols-2 gap-3">
+                                <UserListItem v-for="user of followings"
+                                              :user="user"
+                                              :key="user.id"
+                                              class="shadow rounded-lg"/>
+                            </div>
+                            <div v-else class="text-center py-8">
+                                The user is not following anybody
+                            </div>
                         </TabPanel>
-
-                        <TabPanel class="bg-white p-3 focus:ring-2 shadow">
-                            images
+                        <TabPanel>
+                            <TabPhotos :photos="photos" />
                         </TabPanel>
                         <TabPanel v-if="isMyProfile">
-                            <Edit :must-verify-email="mustVerifyEmail" :status="status" />
+                            <Edit :must-verify-email="mustVerifyEmail" :status="status"/>
                         </TabPanel>
-
 
                     </TabPanels>
                 </TabGroup>

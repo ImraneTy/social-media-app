@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\Group;
 use App\Http\Enums\GroupUserStatus;
 use App\Http\Resources\GroupResource;
+use App\Http\Resources\UserResource;
 
 use Inertia\Inertia;
 
@@ -17,6 +18,8 @@ class HomeController extends Controller
 
     public function index(Request $request){
     $userId = Auth::id();
+    $user = $request->user();
+
 
         $posts=Post::postsForTimeline($userId)
         ->paginate(10);
@@ -40,6 +43,8 @@ class HomeController extends Controller
         return Inertia::render('Home', [
             'posts' => $posts,
             'groups' => GroupResource::collection($groups),
+            'followings' => UserResource::collection($user->followings)
+
         ]);
     }
 }

@@ -280,7 +280,7 @@ function deleteUser(user) {
                         <Tab v-slot="{ selected }" as="template">
                             <TabItem text="Photos" :selected="selected" />
                         </Tab>
-                        <Tab v-if="isCurrentUserAdmin" v-slot="{ selected }" as="template">
+                        <Tab v-slot="{ selected }" as="template">
                             <TabItem text="About" :selected="selected"/>
                         </Tab>
                     </TabList>
@@ -336,6 +336,9 @@ function deleteUser(user) {
                                     Submit
                                 </PrimaryButton>
                             </template>
+                            <div v-else class="ck-content-output" v-html="group.about">
+
+</div>
 
                         </TabPanel>
 
