@@ -215,7 +215,6 @@ function followUser() {
 
                             <div v-if="!isMyProfile">
                                 <PrimaryButton v-if="!isCurrentUserFollower" @click="followUser">
-                                    {{ isCurrentUserFollower }}
                                     Follow User
                                 </PrimaryButton>
                                 <DangerButton v-else @click="followUser">
