@@ -36,6 +36,7 @@ Route::middleware('auth')->group(function () {
     Route::post('post/{post}/reaction', [PostController::class, 'postReaction'])->name('post.reaction');
     Route::post('post/ai-post', [PostController::class, 'aiPostContent'])->name('post.aiContent');
     Route::post('post/fetch-url-preview', [PostController::class, 'fetchUrlPreview']) ->name('post.fetchUrlPreview');
+    Route::post('/{post}/pin', [PostController::class, 'pinUnpin'])->name('post.pinUnpin');
     //comments
     Route::post('post/{post}/comment', [PostController::class, 'createComment'])->name('post.comment.create');
     Route::delete('/comment/{comment}', [PostController::class, 'deleteComment'])->name('comment.delete');

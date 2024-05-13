@@ -31,10 +31,10 @@ class ProfileController extends Controller
         $followerCount = Follower::where('user_id', $user->id)->count();
 
         $posts = Post::postsForTimeline(Auth::id(), false)
-
+            ->leftJoin('users AS u', 'u.pinned_post_id', 'posts.id')
             ->where('user_id', $user->id)
             ->whereNull('group_id')
-
+            ->orderBy('u.pinned_post_id', 'desc')
             ->orderBy('posts.created_at', 'desc')
             ->paginate(10);
 
@@ -144,5 +144,45 @@ class ProfileController extends Controller
 //        session('success', 'Cover image has been updated');
 
         return back()->with('success', $success);
+    }
+
+    public function pinUnpin(Request $request, Post $post)
+    {
+        $forGroup = $request->get('forGroup', false);
+        $group = $post->group;
+
+        if ($forGroup && !$group) {
+            return response("Invalid Request", 400);
+        }
+
+        if ($forGroup && !$group->isAdmin(Auth::id())) {
+            return response("You don't have permission to perform this action", 403);
+        }
+
+        $pinned = false;
+        if ($forGroup && $group->isAdmin(Auth::id())) {
+            if ($group->pinned_post_id === $post->id) {
+                $group->pinned_post_id = null;
+            } else {
+                $pinned = true;
+                $group->pinned_post_id = $post->id;
+            }
+            $group->save();
+        }
+
+        if (!$forGroup) {
+            $user = $request->user();
+            if ($user->pinned_post_id === $post->id) {
+                $user->pinned_post_id = null;
+            } else {
+                $pinned = true;
+                $user->pinned_post_id = $post->id;
+            }
+            $user->save();
+        }
+
+        return back()->with('success', 'Post was successfully ' . ( $pinned ? 'pinned' : 'unpinned' ));
+
+//        return response("You don't have permission to perform this action", 403);
     }
 }

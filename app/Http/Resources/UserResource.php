@@ -18,13 +18,14 @@ class UserResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            "id"=> $this->id, 
-            "name"=> $this->name, 
-            "email"=> $this->email, 
-            "email_verified_at"=> $this->email_verified_at, 
-            "created_at"=> $this->created_at, 
-            "updated_at"=> $this->updated_at, 
-            "username"=> $this->username, 
+            "id" => $this->id,
+            "name" => $this->name,
+            "email" => $this->email,
+            "email_verified_at" => $this->email_verified_at,
+            "created_at" => $this->created_at,
+            "updated_at" => $this->updated_at,
+            "username" => $this->username,
+            'pinned_post_id' => $this->pinned_post_id,
             "cover_url" => $this->cover_path ? Storage::url($this->cover_path) : null,
             "avatar_url" => $this->avatar_path ? Storage::url($this->avatar_path) : '/img/defaulte_avatar.png',
         ];

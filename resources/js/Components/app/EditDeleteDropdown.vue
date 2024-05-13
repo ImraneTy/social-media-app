@@ -26,6 +26,17 @@ const editAllowed = computed(() => {
 })
 
 
+const pinAllowed = computed(() => {
+    return user.value.id === authUser.id || props.post.group && props.post.group.role === 'admin'
+})
+
+const isPinned = computed(() => {
+    if (group?.id) {
+        return group?.pinned_post_id === props.post.id
+    }
+
+    return authUser?.pinned_post_id === props.post.id
+})
 
 const deleteAllowed = computed(() => {
     if (user.value.id === authUser.id) return true;
@@ -113,6 +124,20 @@ function copyToClipboard() {
                                 aria-hidden="true"
                             />
                             Copy Post URL
+                        </button>
+                    </MenuItem>
+                    <MenuItem v-if="pinAllowed" v-slot="{ active }">
+                        <button
+                            @click="$emit('pin')"
+                            :class="[
+                              active ? 'bg-indigo-500 text-white' : 'text-gray-900',
+                              'group flex w-full items-center rounded-md px-2 py-2 text-sm',
+                            ]"
+                        >
+                            <MapPinIcon
+                                class="mr-2 h-5 w-5"
+                                aria-hidden="true" />
+                            {{ isPinned ? 'Unpin' : 'Pin' }}
                         </button>
                     </MenuItem>
 

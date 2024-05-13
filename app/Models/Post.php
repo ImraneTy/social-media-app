@@ -56,21 +56,32 @@ class Post extends Model
 
 
 
-    public static function postsForTimeline($userId): Builder
+    public static function postsForTimeline($userId, $getLatest = true): Builder
     {
-        return Post::query() // SELECT * FROM posts
-            ->withCount('reactions') // Counts all reactions associated with each post
-            ->with([
-                'comments' => function ($query) {
-                    $query->withCount('reactions'); // Counts reactions for each comment
-                },
-                'reactions' => function ($query) use ($userId) {
-                    $query->where('user_id', $userId); // Filters reactions by user_id
-                }
-            ])
-            ->latest(); // Orders posts by created_at in descending order
-    }
+        $query = Post::query() // SELECT * FROM posts
+        ->withCount('reactions') // SELECT COUNT(*) from reactions
+        ->with([
+            'user',
+            'group',
+            'group.currentUserGroup',
+            'attachments',
+            'comments' => function ($query) {
+                $query->withCount('reactions'); // SELECT * FROM comments WHERE post_id IN (1, 2, 3...)
+                // SELECT COUNT(*) from reactions
+            },
+            'comments.user',
+            'comments.reactions' => function ($query) use ($userId) {
+                $query->where('user_id', $userId); // SELECT * from reactions WHERE user_id = ?
+            },
+            'reactions' => function ($query) use ($userId) {
+                $query->where('user_id', $userId); // SELECT * from reactions WHERE user_id = ?
+            }]);
+        if ($getLatest) {
+            $query->latest();
+        }
 
+        return $query;
+    }
     public function isOwner($userId): bool
     {
         return $this->user_id == $userId;
