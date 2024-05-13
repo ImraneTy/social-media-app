@@ -178,7 +178,7 @@ function onCommentDelete(comment) {
                 </Disclosure>
             </div>
         </div>
-        <div v-if="!data.comments.length" class="py-4 text-center dark:text-gray-100">
+        <div v-if="!data.comments.length" class="py-4 text-center ">
             There are no comments.
         </div>
     </div>
