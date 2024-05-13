@@ -41,6 +41,4 @@ const editorConfig = {
     </div>
 </template>
 
-<style scoped>
 
-</style>

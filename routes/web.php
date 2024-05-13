@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use App\Http\Controllers\GroupController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\SearchController;
 
 Route::get('/', [HomeController::class,'index'])
 ->middleware(['auth', 'verified'])->name('dashboard');
@@ -40,6 +41,7 @@ Route::middleware('auth')->group(function () {
     Route::delete('/comment/{comment}', [PostController::class, 'deleteComment'])->name('comment.delete');
     Route::put('/comment/{comment}', [PostController::class, 'updateComment'])->name('comment.update');
     Route::post('/comment/{comment}/reaction', [PostController::class, 'commentReaction'])->name('comment.reaction');
+    Route::get('/search/{search?}', [SearchController::class, 'search'])->name('search');
     //Groups
     Route::post('/group', [GroupController::class, 'store'])
     ->name('group.create');
