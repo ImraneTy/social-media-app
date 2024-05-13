@@ -33,7 +33,9 @@ class StorePostRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'body'=>['nullable','string'],
+            'body' => ['nullable', 'string'],
+            'preview' => ['nullable', 'array'],
+            'preview_url' => ['nullable', 'string'],
             'attachments' => [
                 'array',
                 'max:50',
@@ -41,16 +43,16 @@ class StorePostRequest extends FormRequest
                     // Custom rule to check the total size of all files
                     $totalSize = collect($value)->sum(fn(UploadedFile $file) => $file->getSize());
 
-                    if ($totalSize > 1024 * 1024 * 1024) {
+                    if ($totalSize > 1 * 1024 * 1024 * 1024) {
                         $fail('The total size of all files must not exceed 1GB.');
                     }
                 },
             ],
-            'attachments.*'=>[
+            'attachments.*' => [
                 'file',
-                File::types(self::$extensions)
+                File::types(self::$extensions),
             ],
-            'user_id'=>['numeric'],
+            'user_id' => ['numeric'],
             'group_id' => ['nullable', 'exists:groups,id', function($attribute, $value, \Closure $fail) {
                 $groupUser = GroupUser::where('user_id', Auth::id())
                     ->where('group_id', $value)
@@ -66,12 +68,24 @@ class StorePostRequest extends FormRequest
     }
 
 
-    protected function prepareForValidation(){
+    protected function prepareForValidation()
+    {
+        $body = $this->input('body') ?: '';
+        $previewUrl = $this->input('preview_url') ?: '';
+
+        $trimmedBody = trim(strip_tags($body));
+        if ($trimmedBody == $previewUrl) {
+            $body = '';
+        }
+
+
+
+        // Add your custom key to the request data
         $this->merge([
-            'user_id'=>auth()->user()->id ,
-            'body'=>$this->input('body')?:''
+            'user_id' => auth()->user()->id,
+            'body' => $body
         ]);
-    }   
+    }
 
     public function messages()
     {

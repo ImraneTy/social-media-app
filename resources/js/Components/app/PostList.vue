@@ -86,7 +86,9 @@ onMounted(() => {
 
 <template>
     <div class=" overflow-auto">
-        <PostItem v-for="post of allPosts.data" :key="post.id" :post="post" @editClick="openEditModal" @attachmentClick="openAttachmentPreviewModal"
+        <PostItem v-for="post of allPosts.data" :key="post.id" :post="post"
+                  @editClick="openEditModal"
+                  @attachmentClick="openAttachmentPreviewModal"
         />
         <div ref="loadMoreIntersect"></div>
         <PostModal :post="editPost" v-model="showEditModal" @hide="onModalHide"/>

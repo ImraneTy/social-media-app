@@ -34,8 +34,8 @@ Route::middleware('auth')->group(function () {
     Route::delete('/post/{post}',[PostController::class,'destroy'])->name('post.destroy');
     Route::get('post/download/{attachment}', [PostController::class, 'downloadAttachment'])->name('post.download');
     Route::post('post/{post}/reaction', [PostController::class, 'postReaction'])->name('post.reaction');
-    Route::post('post/ai-post', [PostController::class, 'aiPostContent'])
-    ->name('post.aiContent');
+    Route::post('post/ai-post', [PostController::class, 'aiPostContent'])->name('post.aiContent');
+    Route::post('post/fetch-url-preview', [PostController::class, 'fetchUrlPreview']) ->name('post.fetchUrlPreview');
     //comments
     Route::post('post/{post}/comment', [PostController::class, 'createComment'])->name('post.comment.create');
     Route::delete('/comment/{comment}', [PostController::class, 'deleteComment'])->name('comment.delete');

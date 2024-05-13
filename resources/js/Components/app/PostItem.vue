@@ -11,6 +11,7 @@ import ReadMoreReadLess from "@/Components/app/ReadMoreReadLess.vue";
 import { computed } from "vue";
 import EditDeleteDropdown from "@/Components/app/EditDeleteDropdown.vue";
 import PostAttachments from "@/Components/app/PostAttachments.vue";
+import UrlPreview from "@/Components/app/UrlPreview.vue";
 
 import axiosClient from "@/axiosClient.js";
 import { router } from '@inertiajs/vue3';
@@ -39,6 +40,7 @@ const postBody = computed(() => {
 
     return content;
 })
+
 
 function openEditModal() {
     emit('editClick', props.post)
@@ -75,7 +77,6 @@ function sendReaction() {
 
     <div class="bg-white border rounded p-4 mb-3">
         <div class="flex item-center justify-between  mb-3">
-
             <PostUserHeader :post="post" />
 
             <EditDeleteDropdown :user="post.user" :post="post" @edit="openEditModal" @delete="deletePost" />
@@ -86,6 +87,8 @@ function sendReaction() {
         </div>
         <div class="mb-3">
             <ReadMoreReadLess :content="postBody" />
+
+            <UrlPreview :preview="post.preview" :url="post.preview_url"/>
 
         </div>
 

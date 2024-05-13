@@ -59,9 +59,9 @@ class PostController extends Controller
      */
     public function store(StorePostRequest $request)
     {
-        
         $data = $request->validated();
         $user = $request->user();
+
         DB::beginTransaction();
         $allFilePaths = [];
         try {
@@ -83,6 +83,7 @@ class PostController extends Controller
             }
 
             DB::commit();
+
             $group = $post->group;
 
             if ($group) {
@@ -93,15 +94,15 @@ class PostController extends Controller
             $followers = $user->followers;
             Notification::send($followers, new PostCreated($post, $user, null));
 
-    } catch (\Exception $e) {
-        foreach ($allFilePaths as $path) {
-            Storage::disk('public')->delete($path);
+        } catch (\Exception $e) {
+            foreach ($allFilePaths as $path) {
+                Storage::disk('public')->delete($path);
+            }
+            DB::rollBack();
+            throw $e;
         }
-        DB::rollBack();
-        throw $e;
-    }
 
-        return back(); 
+        return back();
     }
 
     /**
@@ -323,6 +324,37 @@ public function aiPostContent(Request $request)
     return response([
         'content' => $result->choices[0]->message->content
     ]);
+}
+public function fetchUrlPreview(Request $request)
+{
+    $data = $request->validate([
+        'url' => 'url'
+    ]);
+    $url = $data['url'];
+
+    $html = file_get_contents($url);
+
+    $dom = new \DOMDocument();
+
+    // Suppress warnings for malformed HTML
+    libxml_use_internal_errors(true);
+
+    // Load HTML content into the DOMDocument
+    $dom->loadHTML($html);
+
+    // Suppress warnings for malformed HTML
+    libxml_use_internal_errors(false);
+
+    $ogTags = [];
+    $metaTags = $dom->getElementsByTagName('meta');
+    foreach ($metaTags as $tag) {
+        $property = $tag->getAttribute('property');
+        if (str_starts_with($property, 'og:')) {
+            $ogTags[$property] = $tag->getAttribute('content');
+        }
+    }
+
+    return $ogTags;
 }
 
 }
