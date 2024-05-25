@@ -3,6 +3,7 @@ import {computed} from 'vue'
 import {XMarkIcon, PaperClipIcon, ChevronLeftIcon, ChevronRightIcon} from '@heroicons/vue/24/solid'
 import {TransitionRoot,TransitionChild,Dialog,DialogPanel} from '@headlessui/vue'
 import {isImage, isVideo} from "@/helpers.js";
+import {ArrowDownTrayIcon} from '@heroicons/vue/24/outline'
 
 
 
@@ -84,6 +85,12 @@ function next() {
                                         class="absolute right-3 top-3  w-10 h-10 rounded-full hover:bg-black/10 transition flex items-center justify-center text-gray-100 z-40">
                                     <XMarkIcon class="w-6 h-6 "/>
                                 </button>
+                                        <!-- Download -->
+        <a :href="route('post.download', attachment)"
+            class="absolute left-3 top-3  w-10 h-10 rounded-full hover:bg-black/10 transition flex items-center justify-center text-gray-100 z-40">
+            <ArrowDownTrayIcon class="w-4 h-4" />
+        </a>
+        <!-- Download -->
                                 <div class="relative group h-full ">
                                     <div @click="prev"
                                          class="absolute opacity-0 group-hover:opacity-100 text-gray-100 cursor-pointer flex items-center w-12 h-full left-0 bg-black/5 z-30">

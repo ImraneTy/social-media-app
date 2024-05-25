@@ -31,9 +31,11 @@ function search() {
                             <div class="shrink-0 flex items-center">
                                 <Link :href="route('dashboard')">
                                     <ApplicationLogo
-                                        class="block h-9 w-auto fill-current text-gray-800"
+                                        class="block h-11 w-auto fill-current "
+                                        colorClass="text-gray-900"
                                     />
                                 </Link>
+                                
                             </div>
 
                       

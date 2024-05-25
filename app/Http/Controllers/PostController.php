@@ -2,30 +2,32 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Enums\ReactionEnum;
-use App\Http\Requests\StorePostRequest;
-use App\Http\Requests\UpdateCommentRequest;
-use App\Http\Requests\UpdatePostRequest;
-use App\Http\Resources\CommentResource;
-use App\Http\Resources\PostResource;
-use App\Models\Comment;
 use App\Models\Post;
-use App\Models\PostAttachment;
-use App\Models\Reaction;
-use App\Models\User;
-use App\Notifications\CommentCreated;
-use App\Notifications\CommentDeleted;
-use App\Notifications\PostCreated;
-use App\Notifications\PostDeleted;
-use App\Notifications\ReactionAddedOnComment;
-use App\Notifications\ReactionAddedOnPost;
 use Illuminate\Http\Request;
+use App\Http\Requests\StorePostRequest;
+use App\Http\Requests\UpdatePostRequest;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\DB;
+use App\Models\PostAttachment;
+use App\Http\Enums\ReactionEnum;
 use Illuminate\Validation\Rule;
+use App\Models\Reaction;
+use App\Models\PostComment;
+use App\Http\Resources\CommentResource;
+use App\Http\Requests\UpdateCommentRequest;
+use App\Notifications\CommentDeleted;
+use App\Notifications\PostDeleted;
+use App\Notifications\PostCreated;
+use Illuminate\Support\Facades\Notification;
+use App\Http\Resources\PostResource;
+use App\Notifications\CommentCreated;
+use App\Notifications\ReactionAddedOnPost;
+use App\Models\User;
+use App\Notifications\ReactionAddedOnComment;
 use OpenAI\Laravel\Facades\OpenAI;
+
+
 
 class PostController extends Controller
 {
@@ -50,6 +52,7 @@ class PostController extends Controller
             'post' => new PostResource($post)
         ]);
     }
+
 
     /**
      * Store a newly created resource in storage.
@@ -172,97 +175,86 @@ class PostController extends Controller
 
         return response("You don't have permission to delete this post", 403);
     }
-
     public function downloadAttachment(PostAttachment $attachment)
     {
-        // TODO check if user has permission to download that attachment
 
         return response()->download(Storage::disk('public')->path($attachment->path), $attachment->name);
     }
 
-    public function postReaction(Request $request, Post $post)
-    {
+    public function postReaction(Request $request, Post $post){
         $data = $request->validate([
             'reaction' => [Rule::enum(ReactionEnum::class)]
         ]);
+        $userId=Auth::id();
+        $reaction = Reaction::where('user_id', $userId)->where('object_id', $post->id)->where('object_type', Post::class)->first();
 
-        $userId = Auth::id();
-        $reaction = Reaction::where('user_id', $userId)
-            ->where('object_id', $post->id)
-            ->where('object_type', Post::class)
-            ->first();
-
-        if ($reaction) {
-            $hasReaction = false;
+        if($reaction){
+            $hasReaction=false;
             $reaction->delete();
-        } else {
-            $hasReaction = true;
+        }else{
+            $hasReaction=true;
             Reaction::create([
-                'object_id' => $post->id,
-                'object_type' => Post::class,
-                'user_id' => $userId,
-                'type' => $data['reaction']
-            ]);
+            'object_id'=>$post->id,
+            'object_type'=>Post::class,
+            'user_id'=>$userId,
+            'type'=>$data['reaction'],
+        ]);  
 
-            if (!$post->isOwner($userId)) {
-                $user = User::where('id', $userId)->first();
-                $post->user->notify(new ReactionAddedOnPost($post, $user));
-            }
+
+        if (!$post->isOwner($userId)) {
+            $user = User::where('id', $userId)->first();
+            $post->user->notify(new ReactionAddedOnPost($post, $user));
         }
+    }
 
-        $reactions = Reaction::where('object_id', $post->id)->where('object_type', Post::class)->count();
-
+        $reactions = Reaction::where('object_id', $post->id)->where('object_type', post::class)->count();
         return response([
             'num_of_reactions' => $reactions,
             'current_user_has_reaction' => $hasReaction
         ]);
     }
-
     public function createComment(Request $request, Post $post)
     {
         $data = $request->validate([
             'comment' => ['required'],
-            'parent_id' => ['nullable', 'exists:comments,id']
+            'parent_id'=>['nullable','exists:post_comments,id']
         ]);
 
-        $comment = Comment::create([
+        $comment = PostComment::create([
             'post_id' => $post->id,
             'comment' => nl2br($data['comment']),
             'user_id' => Auth::id(),
-            'parent_id' => $data['parent_id'] ?: null
+            'parent_id'=>$data['parent_id']?: null
         ]);
 
         $post = $comment->post;
         $post->user->notify(new CommentCreated($comment, $post));
 
         return response(new CommentResource($comment), 201);
+
     }
 
-    public function deleteComment(Comment $comment)
-    {
+    public function deleteComment(PostComment $comment){
         $post = $comment->post;
         $id = Auth::id();
-        if ($comment->isOwner($id) || $post->isOwner($id)) {
-
-            $allComments = Comment::getAllChildrenComments($comment);
-            $deletedCommentCount = count($allComments);
-
+        if ( $post->isOwner($id)||$post->group && $post->group->isAdmin($id)){
             $comment->delete();
 
             if (!$comment->isOwner($id)) {
                 $comment->user->notify(new CommentDeleted($comment, $post));
             }
 
+            return response('',204);
 
-            return response(['deleted' => $deletedCommentCount], 200);
         }
+            
+            return response("you don't have permision to delete this comment.",403);
 
-        return response("You don't have permission to delete this comment.", 403);
-
-
+       
     }
 
-    public function updateComment(UpdateCommentRequest $request, Comment $comment)
+
+    public function updateComment(UpdateCommentRequest $request, PostComment $comment)
     {
         $data = $request->validated();
 
@@ -273,134 +265,134 @@ class PostController extends Controller
         return new CommentResource($comment);
     }
 
-    public function commentReaction(Request $request, Comment $comment)
-    {
-        $data = $request->validate([
-            'reaction' => [Rule::enum(ReactionEnum::class)]
+
+
+    public function commentReaction(Request $request, PostComment $comment){
+    $data = $request->validate([
+        'reaction' => [Rule::enum(ReactionEnum::class)]
+    ]);
+
+    $userId = Auth::id();
+    $reaction = Reaction::where('user_id', $userId)
+        ->where('object_id', $comment->id)
+        ->where('object_type', PostComment::class)
+        ->first();
+
+    if ($reaction) {
+        $hasReaction = false;
+        $reaction->delete();
+    } else {
+        $hasReaction = true;
+        Reaction::create([
+            'object_id' => $comment->id,
+            'object_type' => PostComment::class,
+            'user_id' => $userId,
+            'type' => $data['reaction']
         ]);
-
-        $userId = Auth::id();
-        $reaction = Reaction::where('user_id', $userId)
-            ->where('object_id', $comment->id)
-            ->where('object_type', Comment::class)
-            ->first();
-
-        if ($reaction) {
-            $hasReaction = false;
-            $reaction->delete();
-        } else {
-            $hasReaction = true;
-            Reaction::create([
-                'object_id' => $comment->id,
-                'object_type' => Comment::class,
-                'user_id' => $userId,
-                'type' => $data['reaction']
-            ]);
-
-            if (!$comment->isOwner($userId)) {
-                $user = User::where('id', $userId)->first();
-                $comment->user->notify(new ReactionAddedOnComment($comment->post, $comment, $user));
-            }
+        if (!$comment->isOwner($userId)) {
+            $user = User::where('id', $userId)->first();
+            $comment->user->notify(new ReactionAddedOnComment($comment->post, $comment, $user));
         }
 
-        $reactions = Reaction::where('object_id', $comment->id)->where('object_type', Comment::class)->count();
-
-        return response([
-            'num_of_reactions' => $reactions,
-            'current_user_has_reaction' => $hasReaction
-        ]);
     }
 
-    public function aiPostContent(Request $request)
-    {
-        $prompt = $request->get('prompt');
+    $reactions = Reaction::where('object_id', $comment->id)->where('object_type', PostComment::class)->count();
 
-        $result = OpenAI::chat()->create([
-            'model' => 'gpt-4',
-            'messages' => [
-                [
-                    'role' => 'user',
-                    'content' => "Please generate social media post content based on the following prompt. Generated formatted content with multiple paragraphs. Put hashtags after 2 lines from the main content" . PHP_EOL . PHP_EOL . "Prompt: " . PHP_EOL
-                        . $prompt
-                ],
+    return response([
+        'num_of_reactions' => $reactions,
+        'current_user_has_reaction' => $hasReaction
+    ]);
+}
+
+public function aiPostContent(Request $request)
+{
+    $prompt = $request->get('prompt');
+
+    $result = OpenAI::chat()->create([
+        'model' => 'gpt-4o',
+        'messages' => [
+            [
+                'role' => 'user',
+                'content' => "Please generate social media post content based on the following prompt. Generated formatted content with multiple paragraphs. Put hashtags after 2 lines from the main content" . PHP_EOL . PHP_EOL . "Prompt: " . PHP_EOL
+                    . $prompt
             ],
-        ]);
+        ],
+    ]);
 
-        return response([
-            'content' => $result->choices[0]->message->content
-//            'content' => "\"🎉 Exciting news! We're thrilled to announce that we just released a brand new feature on our app/website! 💥 Get ready to experience the next level of convenience and efficiency with this game-changing addition. 🚀 Try it out now and let us know what you think! 😍 #NewFeatureAlert #UpgradeYourExperience\""
-        ]);
+    return response([
+        'content' => $result->choices[0]->message->content
+    ]);
+}
+public function fetchUrlPreview(Request $request)
+{
+    $data = $request->validate([
+        'url' => 'url'
+    ]);
+    $url = $data['url'];
+
+    $html = file_get_contents($url);
+
+    $dom = new \DOMDocument();
+
+    // Suppress warnings for malformed HTML
+    libxml_use_internal_errors(true);
+
+    // Load HTML content into the DOMDocument
+    $dom->loadHTML($html);
+
+    // Suppress warnings for malformed HTML
+    libxml_use_internal_errors(false);
+
+    $ogTags = [];
+    $metaTags = $dom->getElementsByTagName('meta');
+    foreach ($metaTags as $tag) {
+        $property = $tag->getAttribute('property');
+        if (str_starts_with($property, 'og:')) {
+            $ogTags[$property] = $tag->getAttribute('content');
+        }
     }
 
-    public function fetchUrlPreview(Request $request)
-    {
-        $data = $request->validate([
-            'url' => 'url'
-        ]);
-        $url = $data['url'];
+    return $ogTags;
+}
 
-        $html = file_get_contents($url);
 
-        $dom = new \DOMDocument();
 
-        // Suppress warnings for malformed HTML
-        libxml_use_internal_errors(true);
+public function pinUnpin(Request $request, Post $post)
+{
+    $forGroup = $request->get('forGroup', false);
+    $group = $post->group;
 
-        // Load HTML content into the DOMDocument
-        $dom->loadHTML($html);
-
-        // Suppress warnings for malformed HTML
-        libxml_use_internal_errors(false);
-
-        $ogTags = [];
-        $metaTags = $dom->getElementsByTagName('meta');
-        foreach ($metaTags as $tag) {
-            $property = $tag->getAttribute('property');
-            if (str_starts_with($property, 'og:')) {
-                $ogTags[$property] = $tag->getAttribute('content');
-            }
-        }
-
-        return $ogTags;
+    if ($forGroup && !$group) {
+        return response("Invalid Request", 400);
     }
 
-    public function pinUnpin(Request $request, Post $post)
-    {
-        $forGroup = $request->get('forGroup', false);
-        $group = $post->group;
-
-        if ($forGroup && !$group) {
-            return response("Invalid Request", 400);
-        }
-
-        if ($forGroup && !$group->isAdmin(Auth::id())) {
-            return response("You don't have permission to perform this action", 403);
-        }
-
-        $pinned = false;
-        if ($forGroup && $group->isAdmin(Auth::id())) {
-            if ($group->pinned_post_id === $post->id) {
-                $group->pinned_post_id = null;
-            } else {
-                $pinned = true;
-                $group->pinned_post_id = $post->id;
-            }
-            $group->save();
-        }
-
-        if (!$forGroup) {
-            $user = $request->user();
-            if ($user->pinned_post_id === $post->id) {
-                $user->pinned_post_id = null;
-            } else {
-                $pinned = true;
-                $user->pinned_post_id = $post->id;
-            }
-            $user->save();
-        }
-
-        return back()->with('success', 'Post was successfully ' . ( $pinned ? 'pinned' : 'unpinned' ));
-
-//        return response("You don't have permission to perform this action", 403);
+    if ($forGroup && !$group->isAdmin(Auth::id())) {
+        return response("You don't have permission to perform this action", 403);
     }
+
+    $pinned = false;
+    if ($forGroup && $group->isAdmin(Auth::id())) {
+        if ($group->pinned_post_id === $post->id) {
+            $group->pinned_post_id = null;
+        } else {
+            $pinned = true;
+            $group->pinned_post_id = $post->id;
+        }
+        $group->save();
+    }
+
+    if (!$forGroup) {
+        $user = $request->user();
+        if ($user->pinned_post_id === $post->id) {
+            $user->pinned_post_id = null;
+        } else {
+            $pinned = true;
+            $user->pinned_post_id = $post->id;
+        }
+        $user->save();
+    }
+
+    return back()->with('success', 'Post was successfully ' . ( $pinned ? 'pinned' : 'unpinned' ));
+
+}
 }

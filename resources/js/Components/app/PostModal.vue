@@ -260,7 +260,7 @@ function matchLink() {
                v-model="show"
                @hide="closeModal">
         <div class="p-4">
-            <PostUserHeader :post="post" :show-time="false" class="mb-4 dark:text-gray-100"/>
+            <PostUserHeader :post="post" :show-time="false" class="mb-4"/>
 
             <div v-if="formErrors.group_id"
                  class="bg-red-400 py-2 px-3 rounded text-white mb-3">

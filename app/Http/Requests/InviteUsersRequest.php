@@ -8,10 +8,12 @@ use App\Models\GroupUser;
 use App\Models\User;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
+
 class InviteUsersRequest extends FormRequest
 {
-
     public ?User $user = null;
+    public ?GroupUser $groupUser = null;
+    public ?Group $group = null;
 
     /**
      * Determine if the user is authorized to make this request.
@@ -39,6 +41,7 @@ class InviteUsersRequest extends FormRequest
 
                 if (!$this->user) {
                     $fail('User does not exist');
+                    return;
                 }
 
                 $this->groupUser = GroupUser::where('user_id', $this->user->id)
