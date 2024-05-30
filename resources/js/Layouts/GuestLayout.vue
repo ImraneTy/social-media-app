@@ -27,7 +27,7 @@ import { Link } from '@inertiajs/vue3';
 <style>
 /* You can add a global style or scoped style depending on your project setup */
 .bg-custom {
-    background-image: url('/public/img/medty_white_background_with_spheres_on_it_350bfd94-f9a6-47a6-aa87-191b082ea651_1.png'); /* Update with the path to your image */
+    background-image: url('/public/img/medty_white_background_with_spheres_on_it_350bfd94-f9a6-47a6-aa87-191b082ea651_1.png'); 
     background-size: cover;
     background-position: center;
 }

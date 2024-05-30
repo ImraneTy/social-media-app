@@ -11,8 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('groups_and_users_tables', function (Blueprint $table) {
-            //
+        Schema::table('groups', function (Blueprint $table) {
+            $table->foreignId('pinned_post_id')->nullable()->constrained('posts');
+        });
+
+        Schema::table('users', function (Blueprint $table) {
+            $table->foreignId('pinned_post_id')->nullable()->constrained('posts');
         });
     }
 
@@ -21,8 +25,12 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('groups_and_users_tables', function (Blueprint $table) {
-            //
+        Schema::table('groups', function (Blueprint $table) {
+            $table->dropColumn('pinned_post_id');
+        });
+
+        Schema::table('users', function (Blueprint $table) {
+            $table->dropColumn('pinned_post_id');
         });
     }
 };
