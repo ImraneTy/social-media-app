@@ -4,6 +4,8 @@ namespace App\Http\Resources;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use App\Models\Reaction;
+use App\Models\Post;
 
 class PostResource extends JsonResource
 {
@@ -12,34 +14,32 @@ class PostResource extends JsonResource
      *
      * @return array<string, mixed>
      */
-    public function toArray(Request $request): array
+    public function toArray($request): array
     {
-        $comments=$this->comments;
+        $comments = $this->comments;
         return [
-        'id'=>$this->id,
-        'body'=>$this->body, 
-        'preview' => $this->preview,
-        'preview_url' => $this->preview_url,
-        'created_at'=>$this->created_at->format('Y-m-d H:i:s'),
-        'updated_at'=>$this->updated_at->format('Y-m-d H:i:s'),
-        'user'=> new UserResource($this->user),
-        'group' => new GroupResource($this->group),
-        'attachments'=> PostAttachmentResource::collection($this->attachments),
-        'num_of_reactions' => count($this->reactions),
-        'num_of_comments' => count($comments),
-        'current_user_has_reaction'=>$this->reactions->count()>0,
-        'comments' => self::convertCommentsIntoTree($comments)
-
+            'id' => $this->id,
+            'body' => $this->body,
+            'preview' => $this->preview,
+            'preview_url' => $this->preview_url,
+            'created_at' => $this->created_at->format('Y-m-d H:i:s'),
+            'updated_at' => $this->updated_at->format('Y-m-d H:i:s'),
+            'user' => new UserResource($this->user),
+            'group' => new GroupResource($this->group),
+            'attachments' => PostAttachmentResource::collection($this->attachments),
+            'num_of_reactions' => Reaction::where('object_id', $this->id)->where('object_type', Post::class)->count(),
+            'num_of_comments' => count($comments),
+            'current_user_has_reaction' => $this->reactions->count() > 0,
+            'comments' => self::convertCommentsIntoTree($comments)
         ];
     }
 
     /**
-     *
+     * Convert comments into a tree structure.
      *
      * @param \App\Models\PostComment[] $comments
-     * @param                       $parentId
+     * @param int|null $parentId
      * @return array
-     * @author TAYA Imrane ||tayaimrane@gmail.com||
      */
     private static function convertCommentsIntoTree($comments, $parentId = null): array
     {
@@ -47,7 +47,7 @@ class PostResource extends JsonResource
 
         foreach ($comments as $comment) {
             if ($comment->parent_id === $parentId) {
-                // Find all comment which has parentId as $comment->id
+                // Find all comments which have parentId as $comment->id
                 $children = self::convertCommentsIntoTree($comments, $comment->id);
                 $comment->childComments = $children;
                 $comment->numOfComments = collect($children)->sum('numOfComments') + count($children);
