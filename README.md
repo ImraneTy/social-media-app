@@ -3,6 +3,9 @@ Laravel Social Media Website built with Inertia Vue.js
 
 ## Installation with docker
 
+#### 1. Note !!!!!!!!!!!!!!!!
+If you are using windows make sure that you installed WSL2 and start your project in ubuntu terminal
+
 #### 1. Clone the project
 ```bash
 git clone https://github.com/ImraneTy/social-media-app.git
@@ -57,4 +60,11 @@ npm install
 
 ```bash
 npm run dev
+```
+
+
+### 8. Create a symbolic link
+
+```bash
+php artisan storage:link
 ```
