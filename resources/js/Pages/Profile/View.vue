@@ -83,7 +83,7 @@ function resetCoverImage() {
     coverImageSrc.value = null;
 
 }
-function resetlAvatarImage() {
+function resetAvatarImage() {
     imagesForm.avatar = null;
     avatarImageSrc.value = null;
 
